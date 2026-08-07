@@ -1,0 +1,115 @@
+---
+title: "SELECT"
+description: "Aprenda a consultar e extrair dados de bancos relacionais com o comando`SELECT`, o mais utilizado no SQL." 
+format: html
+execute:
+  eval: false
+  echo: true
+---
+
+## Instruções
+
+- Na pasta `datasets` deste repositório encontrarão dois bancos de dados: `netflix.sqlie` e `chinook.sqlite`, ambos foram obtidos do repositório `https://github.com/lerocha` e podem ser utilizados para praticar.
+- Ao longo da disciplina utilizaremos dois bancos de dados: `PRESERVE` e `EMPLOYEE`.
+
+
+```{r, eval=TRUE, echo=FALSE, warning=FALSE}
+library(DBI)
+library(RSQLite)
+
+# Cria/Conecta ao arquivo de banco de dados
+con <- dbConnect(RSQLite::SQLite(), "meu_banco.db")
+```
+
+
+
+# CREATE TABLE
+
+```{sql connection=con}
+DROP TABLE IF EXISTS PRESERVE;
+DROP TABLE IF EXISTS EMPLOYEE;
+
+CREATE TABLE PRESERVE
+(PNO   INTEGER          NOT NULL UNIQUE,
+ PNAME VARCHAR (25)     NOT NULL,
+ STATE CHAR (2)         NOT NULL,
+ ACRES INTEGER          NOT NULL,
+ FEE   DECIMAL (5,2)    NOT NULL);
+
+INSERT INTO PRESERVE VALUES (5,  'HASSAYAMPA RIVER',         'AZ', 660,   3.00);
+INSERT INTO PRESERVE VALUES (3,  'DANCING PRAIRIE',          'MT', 680,   0.00);
+INSERT INTO PRESERVE VALUES (7,  'MULESHOE RANCH',           'AZ', 49120, 0.00);
+INSERT INTO PRESERVE VALUES (40, 'SOUTH FORK MADISON',       'MT', 121,   0.00);
+INSERT INTO PRESERVE VALUES (14, 'MCELWAIN-OLSEN',           'MA', 66,    0.00);
+INSERT INTO PRESERVE VALUES (13, 'TATKON',                   'MA', 40,    0.00);
+INSERT INTO PRESERVE VALUES (9,  'DAVID H. SMITH',           'MA', 830,   0.00);
+INSERT INTO PRESERVE VALUES (11, 'MIACOMET MOORS',           'MA', 4,     0.00);
+INSERT INTO PRESERVE VALUES (12, 'MOUNT PLANTAIN',           'MA', 730,   0.00);
+INSERT INTO PRESERVE VALUES (1,  'COMERTOWN PRAIRIE',        'MT', 1130,  0.00);
+INSERT INTO PRESERVE VALUES (2,  'PINE BUTTE SWAMP',         'MT', 15000, 0.00);
+INSERT INTO PRESERVE VALUES (80, 'RAMSEY CANYON',            'AZ', 380,   3.00);
+INSERT INTO PRESERVE VALUES (10, 'HOFT FARM',                'MA', 90,    0.00);
+INSERT INTO PRESERVE VALUES (6,  'PAPAGONIA-SONOITA CREEK',  'AZ', 1200,  3.00);
+
+CREATE TABLE EMPLOYEE
+(ENO    CHAR (4)       NOT NULL UNIQUE,
+ ENAME  VARCHAR(25)    NOT NULL,
+ SALARY DECIMAL(7,2)   NOT NULL,
+ DNO    INTEGER        NOT NULL);
+
+INSERT INTO EMPLOYEE VALUES ('1000', 'MOE',    2000.00, 20);
+INSERT INTO EMPLOYEE VALUES ('2000', 'LARRY',  2000.00, 10);
+INSERT INTO EMPLOYEE VALUES ('3000', 'CURLY',  3000.00, 20);
+INSERT INTO EMPLOYEE VALUES ('4000', 'SHEMP',   500.00, 40);
+INSERT INTO EMPLOYEE VALUES ('5000', 'JOE',     400.00, 10);
+INSERT INTO EMPLOYEE VALUES ('6000', 'GEORGE', 9000.00, 20);
+```
+
+
+# SELECT
+
+
+1. Mostrar todas as linhas e colunas da tabela `PRESERVE`.
+2. Mostrar apenas as linhas para as quais `FEE` é igual a 3.
+3. Mostrar apenas as linhas nas quais `STATE` é igual a `MA`
+4. Mostrar apenas as linhas nas quais `PNAME` é `MOUNT PLANTAIN`
+5. Mostrar apenas as colunas `STATE`, `PNAME` e `ACRES` (nessa ordem)
+6. Selecionar as colunas `STATE` e `ACRES` e mostrar apneas as linhas nas quais `STATE` é igual a `MA`
+7. Mostrar apenas as linhas nas quais `STATE` é igual a `MA` e `FEE` é diferente de 3
+8. Mostrar apenas as colunas  `PNAME`, `STATE`, `FEE` e `ACRES` para os casos em que STATE é diferente de `MA`, `FEE` é diferente de 3, e `ACRESS` é maior do que 1000.
+
+
+::: {.callout-important}
+# SINTAXE
+```{sql connection=con}
+SELECT nome_das_colunas FROM nome_da_tabela WHERE condicao
+```
+:::
+
+
+# Hands-On
+
+::: {.callout-note}
+# Praticando com `SELECT`
+
+Os exercícios a seguir fazem referência à tabela `PRESERVE`.
+
+1. Exiba a linha cujo número da reserva (PNO) seja igual a 5.
+2. Exiba todas as informações sobre qualquer reserva natural que não cobre taxa de entrada (ou seja, `FEE` é igual a zero).
+3. Exiba todas as informações sobre qualquer reserva natural com área superior a 1.000 acres.
+4. Exiba todas as informações sobre qualquer reserva natural localizada no estado de Montana.
+5. Exiba todas as informações sobre a reserva Pine Butte Swamp.
+6. Exiba o número e o nome da reserva, nessa ordem da esquerda para a direita, de todas as reservas naturais.
+7. Exiba o código do estado e o nome da reserva, nessa ordem da esquerda para a direita, de todas as reservas naturais.
+8. Exiba o número e o nome da reserva para todas as reservas naturais cuja área exceda 2.000 acres.
+9. Exiba o nome de todas as reservas naturais localizadas no estado de Massachusetts.
+
+
+Os exercícios a seguir fazem referência à tabela `EMPLOYEE`.
+
+10. Assuma que você não sabe nada sobre essa tabela, exceto que ela possui um número pequeno de linhas. Exiba todos os dados contidos nessa tabela.
+11. Exiba todas as informações sobre qualquer funcionário cujo valor de salário (`SALARY`) exceda $1.000,00.
+12. Exiba todas as informações sobre o funcionário 2000 (`ENO` é igual a 2000).
+13. Exiba os valores de `ENAME` e `DNO` de todos os funcionários.
+14. Exiba os valores de `ENAME` e `SALARY` de todos os funcionários cujo valor de salário seja inferior a $1.000,00.
+:::
