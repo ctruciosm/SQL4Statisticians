@@ -1,0 +1,109 @@
+---
+title: "ORDER BY"
+description: "Aprenda a utilizar a cláusula `ORDER BY` e ordene resultados numa tabela." 
+format: html
+execute:
+  eval: true
+  echo: true
+---
+
+## Intruções
+
+- No arquivo `me315.sqlite` encontram-se as tabelas `PRESERVE` e `EMPLOYEE` criadas na aula anterior.
+- Importe o banco de dados no [https://www.sqliteview.com/app](https://www.sqliteview.com/app)
+
+
+# Tabelas
+
+```{r, echo=FALSE, warning=FALSE}
+library(DBI)
+library(RSQLite)
+
+# Conecta/Cria o arquivo
+con <- dbConnect(RSQLite::SQLite(), "me315.sqlite")
+```
+
+
+```{sql connection=con, eval=TRUE}
+SELECT * FROM PRESERVE
+```
+
+```{sql connection=con, eval=TRUE}
+SELECT * FROM EMPLOYEE
+```
+
+
+# ORDER BY
+
+Os exercícios a seguir fazem referência à tabela `PRESERVE`
+
+1. Selecione as colunas `STATE`, `PNO` e `PNAME` e exiba todas as linhas, ordenadas pelos valores de `STATE` em ordem crescente.
+2. Selecione as colunas `STATE`, `PNO` e `PNAME` e exiba todas as linhas, ordenadas pelos valores de `STATE` em ordem decrescente.
+3. Selecione as colunas `STATE`, `PNO` e `PNAME` e exiba todas as linhas, ordenadas pelos valores de `STATE` e `PNO`, ambos em forma decrescente
+4. Selecione as colunas `STATE`, `PNO` e `PNAME` e exiba todas as linhas, ordenadas em ordem decrescente pelos valores de `PNO`, nas quais `STATE` 
+e AZ.
+5. Exiba o número da reserva (`PNO`), a área em acres (`ACRES`) e o nome de cada reserva natural (`PNAME`) localizada no estado de Arizona. Ordene o resultado pela terceira coluna.
+6. Exiba a tabela `PRESERVE` inteira, ordenada pela quarta coluna em ordem descendente e a segunda coluna em ordem crescente.
+
+::: {.callout-tip}
+# PARA PENSAR:
+Qual é melhor: utilizar a posição relativa da coluna de interesse ou o nome da coluna? Por quê?
+:::
+
+7. Exiba os valores de `PNO` e `PNAME` de todas as reservas. Apresente o resultado ordenado por `ACRES`, em ordem decrescente.
+8. Exiba os valores de `STATE`, `FEE` e `PNAME` de todas as linhas da tabela `PRESERVE`, em que:
+
+- `STATE` é a 1ª coluna de ordenação (ordem crescente);
+- `FEE` é a 2ª coluna de ordenação (ordem decrescente);
+- `PNAME` é a 3ª coluna de ordenação (ordem decrescente).
+
+::: {.callout-tip}
+# PARA PENSAR:
+Imagine que a coluna que seja ordenar tem números, letras (maiusculas e minuscular) e simbolos. Como será feita a ordenação?
+:::
+
+Seu sistema resolve essa complexidade ordenando de acordo com uma “sequência de ordenação” definida pelo próprio sistema.
+
+A maioria dos sistemas de banco de dados usa a sequência de ordenação ASCII (American Standard Code for Information Interchange) para determinar a ordem de uma coluna que contém cadeias de caracteres (strings). Na sequência ASCII, a maioria (mas não todos) dos caracteres especiais é ordenada antes dos dígitos, que são ordenados antes das letras maiúsculas, que, por sua vez, são ordenadas antes das letras minúsculas. O `espaço em branco` é um caractere especial que é ordenado antes de todos os demais caracteres. O manual de referência do seu sistema SQL apresentará os detalhes.
+
+9. Exiba os valores de `PNO` e `ACRES` das três primeiras linhas (ordenadas pelos valores do `PNO`).
+
+
+::: {.callout-important}
+# SINTAXE
+```{sql connection=con, eval=FALSE}
+SELECT nome_das_colunas FROM nome_da_tabela 
+WHERE condicao
+ORDER BY coluna_da_ordenacao
+```
+:::
+
+
+
+# Hands-On
+
+::: {.callout-note}
+# Praticando com `ORDER BY`
+
+Os exercícios a seguir fazem referência à tabela `PRESERVE`.
+
+1. Exiba a tabela inteira. Ordene o resultado pela coluna `ACRES` em ordem crescente.
+2. Exiba o nome da reserva (`PNAME`) e a taxa de entrada (`FEE`) de cada reserva natural localizada em Montana. Ordene o resultado pelo nome da reserva em ordem decrescente.
+3. Exiba as colunas `FEE` e `ACRES` de todas as linhas da tabela. Ordene as linhas exibidas por `ACRES` dentro de `FEE` (`FEE` é o campo de ordenação principal, e `ACRES` é o campo de ordenação secundário.)
+4. Suponha (irrealisticamente) que os valores de `PNO` sejam considerados confidenciais. Exiba o valor de `PNAME` para cada reserva natural localizada no Arizona. Apresente o resultado em ordem crescente de `PNO`, sem exibir os valores de `PNO`.
+5. Exiba os valores de `STATE`, `FEE` e `PNO` para todas as reservas naturais que tenham mais de 100 acres. Ordene a tabela resultante da seguinte forma:
+
+- `STATE` é o campo de ordenação de primeiro nível, em ordem decrescente;
+- `FEE` é o campo de ordenação de segundo nível, em ordem decrescente;
+- `PNO` é o campo de ordenação de terceiro nível, em ordem crescente.
+
+6. Exiba todas as linhas em que o valor de `STATE` seja maior ou igual à letra `M`.
+7. Exiba todas as linhas em que o valor do nome da reserva (`PNAME`) seja menor que `TATKON`.
+
+
+Os exercícios a seguir fazem referência à tabela `EMPLOYEE`.
+
+9. Exiba a tabela EMPLOYEE inteira, ordenada pelo nome do funcionário em ordem crescente.
+10. Exiba o nome e o salário de qualquer funcionário cujo salário seja superior a $ 2.000,00. Ordene o resultado pelo salário em ordem decrescente.
+11. Exiba o número do departamento (`DNO`), o número do funcionário (`ENO`) e o nome do funcionário de todos os funcionários (`ENAME`). Ordene o resultado pelo número do funcionário (em ordem crescente) dentro do número do departamento (em ordem decrescente).
+:::
