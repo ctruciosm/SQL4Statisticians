@@ -1,0 +1,176 @@
+---
+title: "DISTINCT, AND-OR-NOT"
+description: "Aprenda a utilizar `DISTINCT` e os operadores `AND`, `OR`, `NOT` para selecionar e filtrar dados em tabelas SQL." 
+format: html
+execute:
+  eval: true
+  echo: true
+---
+
+## Intruções
+
+- No arquivo `me315.sqlite` encontram-se as tabelas `PRESERVE` e `EMPLOYEE` criadas na aula anterior.
+- Importe o banco de dados no [https://www.sqliteview.com/app](https://www.sqliteview.com/app) ou configure o Rstudio (Posit Cloud) para trabalhar com `SQLIte`
+
+```{r, echo=TRUE, warning=FALSE}
+library(DBI)
+library(RSQLite)
+
+# Conecta/Cria o arquivo
+con <- dbConnect(RSQLite::SQLite(), "datasets/me315.sqlite")
+```
+
+# Tabelas
+
+```{sql connection=con, eval=TRUE}
+SELECT * FROM PRESERVE
+```
+
+```{sql connection=con, eval=TRUE}
+SELECT * FROM EMPLOYEE
+```
+
+
+# DISTINCT
+
+1.  Recupere todas as linhas da tabela `PRESERVE`. Exiba apenas o valor de `FEE` para cada linha. Antes de executar a QUERY responda: é possível que valores duplicados apareçam neste resultado?
+2.  Recupere todas as linhas da tabela `PRESERVE`. Exiba apenas o valor de `ACRES` para cada linha. Antes de executar a QUERY responda: é possível que valores duplicados apareçam neste resultado?
+
+
+::: {.callout-note}
+# DISTINCT
+```{sql connection=con, eval=FALSE}
+SELECT DISTINCT nome_das_colunas FROM nome_da_tabela
+```
+`DISTINCT` **deve** ir imediatamente depois do `SELECT`
+:::
+
+
+3. Repetir 1 e 2, mas dessa vez não mostrar valores duplicados.
+4. Mostre os valores de `FEE` e `ACRES` referentes à tabela `PRESERVE`. Se existirem observações duplicadas, eliminá-las. 
+5. Compare as seguintes QUERYS:
+    - `SELECT PNO FROM PRESERVE`
+    - `SELECT DISTINCT PNO FROM PRESERVE`
+    
+Observa alguma diferença?
+
+
+
+::: {.callout-note}
+# SINTAXE
+Se utilizarmos `DISTINCT`, `WHERE` e `ORDER BY`. Qual a ordem a ser utilizada?
+```{sql connection=con, eval=FALSE}
+SELECT [DISTINCT] nome_das_colunas 
+FROM nome_da_tabela
+[WHERE condicao]
+[ORDER BY nome_das_colunas]
+```
+:::
+
+
+# AND-OR-NOT
+
+6.  Exiba todas as informações sobre qualquer reserva natural localizada no Arizona e que não tenha taxa de entrada
+7.  Exiba todas as informações sobre qualquer reserva natural localizada no Arizona ou que não tenha taxa de entrada
+
+
+
+::: {.callout-note}
+# AND e OR
+Para saber quando e como utilizar, basta se lembrar da **Tabela-verdade**
+
+
+| P | Q | P ∧ Q (AND) | P ∨ Q (OR) |
+| :-: | :-: | :-: | :-: |
+| V | V | V | V |
+| V | F | F | V |
+| F | V | F | V |
+| F | F | F | F |
+:::
+
+
+8.  Exiba os valores de `PNO`, `PNAME` e `ACRES` para qualquer reserva natural cujo valor de `ACRES` seja estritamente entre 90 e 1200.
+9.  Exiba os valores de `PNO`, `PNAME`, `FEE` e `ACRES` de todas as reservas naturais localizadas no Arizona que possuem taxa de entrada diferente de zero e área maior ou igual a 660 acres e menor ou igual a 1.200 acres.
+10. Exiba os valores de `PNO`, `PNAME` e `STATE` de todas as reservas naturais localizadas no Arizona ou em Montana.
+11. Exiba os valores de `PNO` e `PNAME` de qualquer reserva natural que possua um valor de `PNO` igual a qualquer um dos valores \{3, 4, 7, 12, 40\}.
+12. Exiba os valores de `PNAME` e `STATE` de todas as reservas naturais que não estão localizadas em Massachusetts.
+13. Exiba os valores de `PNAME`, `STATE`, `FEE` e `ACRES` de qualquer reserva natural que tenha mais de 1.000 acres ou esteja localizada no Arizona, e que possua taxa de entrada de US$ 3,00 (independentemente de sua localização e extensão em acres).
+14. Exiba os valores de `PNAME`, `STATE`, `FEE` e `ACRES` de qualquer reserva natural com mais de 1.000 acres ou de qualquer reserva do Arizona com taxa de entrada de US\$ 3,00.
+15. Exiba os valores de `PNO`, `STATE` e `FEE` de todas as reservas naturais, exceto daquelas reservas que estão localizadas no Arizona e possuem taxa de entrada de US\$ 3,00.
+16. Exiba os valores de `PNAME`, `STATE`, `FEE` e `ACRES` de todas as reservas que sejam menores que 50 acres, ou de qualquer reserva que possua taxa de entrada de US$ 3,00 e não esteja localizada em Massachusetts.
+
+
+
+::: {.callout-important}
+# Hierarquia
+Se não utilizarmos `( )`, a ordem na qual a QUERY é executada será:
+
+1.  NOT
+2.  AND
+3.  OR
+:::
+
+
+::: {.callout-tip}
+# Dicas
+
+- C1 AND (C2 OR C3) = (C1 AND C2) OR (C1 AND C3)
+- C1 OR (C2 AND C3) = (C1 OR C2) AND (C1 OR C3)
+- NOT (C1 AND C2) = (NOT C1) OR (NOT C2)
+- NOT (C1 OR C2) = (NOT C1) AND (NOT C2)
+:::
+
+
+
+# Hands-On
+
+::: {.callout-note}
+# Lista 3
+
+1.  Exiba os valores de `STATE` e `FEE` da tabela `PRESERVE` mas sem duplicados.
+2.  Exiba todos os valores de `DNO` na tabela `EMPLOYEE`. Não exiba valores duplicados.
+3.  Execute as QUERYS a seguir. Examine as tabelas resultantes e faça as observações relevantes.
+    - `SELECT DNO, SALARY FROM EMPLOYEE`
+    - `SELECT DISTINCT DNO, SALARY FROM EMPLOYEE`
+    - `SELECT DISTINCT DNO, SALARY FROM EMPLOYEE ORDER BY DNO, SALARY`
+
+4.  Exiba todas as informações sobre qualquer reserva natural em Montana que seja menor que 1.000 acres.
+5.  Exiba todas as informações sobre qualquer reserva natural cujo valor de ACRES esteja entre 1200 e 15000, inclusive.
+6.  Exiba todas as informações sobre qualquer reserva natural localizada em Montana que não possua taxa de entrada e seja maior que 10.000 acres.
+7.  Exiba todas as informações sobre as reservas naturais localizadas em Montana ou Massachusetts.
+8.  Exiba todas as informações sobre qualquer reserva natural localizada em Montana ou qualquer reserva que seja menor que 1.000 acres.
+9.  Exiba o número e o nome de qualquer reserva natural que possua taxa de entrada que não seja igual a zero.
+10. Exiba o número e o nome das reservas naturais que não possuem taxa de entrada de US\$ 3,00 e não possuem taxa de US$ 10,00.
+11.  Exiba todas as informações sobre qualquer reserva natural localizada no Arizona que não possua taxa de entrada, ou qualquer reserva que seja menor que 100 acres (independentemente de seus valores de `STATE` e `FEE`).
+12. Exiba todas as informações sobre qualquer reserva natural que seja menor que 1.000 acres e tenha taxa de entrada de zero dólares ou esteja localizada no Arizona.
+13. Selecione todas as informações sobre qualquer reserva natural com taxa de entrada que não seja maior que zero, ou qualquer outra reserva, independentemente de sua taxa, que esteja localizada em Montana e seja maior que 1.000 acres.
+14. Exiba todas as informações sobre todas as reservas naturais, exceto aquelas reservas de Montana sem taxa de entrada.
+15. As seguintes cláusulas WHERE são logicamente equivalentes?
+
+```sql
+WHERE STATE = 'MA' AND (ACRES > 1000 OR FEE = 0.0)
+WHERE (STATE = 'MA' AND ACRES > 1000) OR (STATE = 'MA' AND FEE = 0.0)
+```
+
+16. As seguintes cláusulas WHERE são logicamente equivalentes?
+
+```sql
+WHERE STATE = 'MA' OR (ACRES > 1000 AND FEE = 0.0)
+WHERE (STATE = 'MA' OR ACRES > 1000) AND (STATE = 'MA' OR FEE = 0.0)
+```
+
+17. As seguintes cláusulas WHERE são logicamente equivalentes?
+
+```sql
+WHERE NOT (ACRES < 50 AND STATE = 'MA')
+WHERE NOT ACRES < 50 AND NOT STATE = 'MA'
+WHERE ACRES >= 50 OR STATE <> 'MA'
+```
+
+18. As seguintes cláusulas WHERE são logicamente equivalentes?
+
+```sql
+WHERE NOT (ACRES < 50 OR STATE = 'MA')
+WHERE NOT ACRES < 50 OR NOT STATE = 'MA'
+WHERE NOT ACRES < 50 AND NOT STATE = 'MA'
+```
