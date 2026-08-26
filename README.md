@@ -5,10 +5,11 @@
 
 
 
-| Tópico              | Aula    |
-|:-------------------:|:-------:|
-| SELECT              | [Link](https://ctruciosm.github.io/SQL4Statisticians/Aula01.html)|
-| ORDER BY            | [Link](https://ctruciosm.github.io/SQL4Statisticians/Aula02.html)|
+| Tópico                | Aula    |
+|:---------------------:|:-------:|
+| SELECT                | [Link](https://ctruciosm.github.io/SQL4Statisticians/Aula01.html)|
+| ORDER BY              | [Link](https://ctruciosm.github.io/SQL4Statisticians/Aula02.html)|
+| DISTINCT, AND-OR-NOT  | [Link](https://ctruciosm.github.io/SQL4Statisticians/Aula03.html)|
 
 # Material
 
