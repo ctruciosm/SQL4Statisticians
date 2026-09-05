@@ -11,6 +11,9 @@
 | ORDER BY              | [Link](https://ctruciosm.github.io/SQL4Statisticians/Aula02.html)|
 | DISTINCT, AND-OR-NOT  | [Link](https://ctruciosm.github.io/SQL4Statisticians/Aula03.html)|
 | IN, BETWEEN, LIKE  | [Link](https://ctruciosm.github.io/SQL4Statisticians/Aula04.html)|
+| Expressões aritméticas e funções de agregação  | [Link](https://ctruciosm.github.io/SQL4Statisticians/Aula05.html)|
+
+
 
 # Material
 
