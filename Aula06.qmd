@@ -1,0 +1,186 @@
+---
+title: "GROUP BY"
+format: 
+  html:
+    code-fold: true
+execute:
+  eval: true
+  echo: true
+---
+
+## Intruções
+
+- No arquivo `me315.sqlite` encontram-se as tabelas `PRESERVE` e `EMPLOYEE` criadas na aula anterior.
+- Importe o banco de dados no [https://www.sqliteview.com/app](https://www.sqliteview.com/app) ou configure o Rstudio (Posit Cloud) para trabalhar com `SQLIte`
+
+```{r, echo=TRUE, warning=FALSE}
+library(DBI)
+library(RSQLite)
+
+# Conecta/Cria o arquivo
+con <- dbConnect(RSQLite::SQLite(), "datasets/me315.sqlite")
+```
+
+# Tabelas
+
+```{sql connection=con, eval=TRUE}
+SELECT * FROM PRESERVE
+```
+
+```{sql connection=con, eval=TRUE}
+SELECT * FROM EMPLOYEE
+```
+
+
+# GROUP BY
+
+
+::: {.callout-tip}
+# Sintaxe
+```{sql connection=con, eval=FALSE}
+SELECT grouping_column, funcao_de_agregacao FROM Tabela
+WHERE condicao
+GROUP BY grouping_column
+```
+WHERE sempre é antes do GROUP BY
+:::
+
+
+
+1.  Para cada estado mencionado na tabela `PRESERVE`, exiba o número total de acres de todas as áreas de preservação localizadas nesse estado.
+
+```{sql connection=con}
+SELECT STATE, SUM(ACRES) FROM PRESERVE
+GROUP BY STATE
+```
+2.  Modifique a consulta de exemplo anterior de modo que apenas as linhas com valores de PNO menores que 12 sejam consideradas.
+
+```{sql connection=con}
+SELECT STATE, SUM(ACRES) FROM PRESERVE
+WHERE PNO < 12
+GROUP BY STATE
+```
+3.  Exiba a tabela de resultados da consulta de exemplo anterior. Ordene os resultados em ordem crescente, de acordo com os totais resumidos.
+
+
+```{sql connection=con}
+SELECT STATE, SUM(ACRES) FROM PRESERVE
+WHERE PNO < 12
+GROUP BY STATE
+ORDER BY 2
+```
+
+```{sql connection=con}
+SELECT STATE, SUM(ACRES) AS SOMA FROM PRESERVE
+WHERE PNO < 12
+GROUP BY STATE
+ORDER BY SOMA
+```
+4.  Para cada estado mencionado na tabela `PRESERVE`, exiba o número total de acres e o número de reservas naturais por estado. Estamos apenas interessados nas reservas com PNO menores a 10. Ordene os resultrados pero número de reservas por estado (de forma decrescente)
+
+
+```{sql connection=con}
+SELECT STATE, SUM(ACRES) AS SOMA, COUNT(*) AS NUM FROM PRESERVE
+WHERE PNO < 10
+GROUP BY STATE
+ORDER BY NUM DESC
+```
+5.  Exiba o código do estado e a taxa média de admissão por estado que possua uma área de preservação natural com mais de 1.000 acres.
+
+```{sql connection=con}
+SELECT STATE, AVG(FEE) FROM PRESERVE
+WHERE ACRES > 1_000
+GROUP BY STATE
+```
+
+6.  Para cada estado mencionado na tabela `PRESERVE`, calcule a área total, em acres, de todas as suas áreas de preservação. Em seguida, exiba cada `STATE` e sua área total, somente se esse total for superior a 15.000 acres.
+
+```{sql connection=con}
+SELECT STATE, SUM(ACRES) AS TOTAL FROM PRESERVE
+GROUP BY STATE
+HAVING TOTAL > 15_000
+```
+
+
+::: {.callout-tip}
+# HAVING
+```{sql connection=con, eval=FALSE}
+HAVING condicao
+```
+
+- A clausula `HAVING` deve estar logo depois do `GROUP BY`
+- A condição deve referenciar a um resultado intermediario produzido pela clausula `GROUO BY`
+:::
+
+7.  No exercício anterior, não considere as áreas de preservação de Montana. Exiba cada estado e sua área total, em acres, somente se essa área total for superior a 15.000 acres.
+
+```{sql connection=con}
+SELECT STATE, SUM(ACRES) AS TOTAL FROM PRESERVE
+WHERE STATE <> 'MT'
+GROUP BY STATE
+HAVING TOTAL > 15_000
+```
+
+8.  Exiba os valores mínimo e máximo de área, em acres, das áreas de preservação natural localizadas em cada estado, desde que o valor mínimo de `ACRES` seja superior a 10 acres e o valor máximo de `ACRES` seja inferior a 20.000 acres. Exiba o código do estado, juntamente com seus valores mínimo e máximo de área.
+
+
+
+```{sql connection=con}
+SELECT STATE, MIN(ACRES), MAX(ACRES) FROM PRESERVE
+GROUP BY STATE
+HAVING MIN(ACRES) > 10 and MAX(ACRES) < 20_000
+```
+9.  Determine a área total, em acres, para cada estado e, em seguida, exiba o menor desses totais.
+
+```{sql connection=con}
+SELECT STATE, SUM(ACRES) FROM PRESERVE
+GROUP BY STATE
+ORDER BY SUM(ACRES)
+LIMIT 1
+```
+
+10. **Bônus**
+
+```{sql connection=con}
+SELECT STATE, SUM(ACRES) AS TOTAL
+FROM PRESERVE
+GROUP BY STATE
+UNION ALL
+SELECT 'TOTAL', SUM(ACRES)
+FROM PRESERVE;
+```
+
+
+
+# Hands-On
+
+::: {.callout-note}
+# Lista 4
+
+
+1.  Para cada estado mencionado na tabela `PRESERVE`, exiba o valor de `ACRES` da menor área de preservação natural localizada nesse estado.
+2.  Não considere nenhuma área de preservação natural que tenha mais de 10.000 acres. Para cada estado mencionado na tabela `PRESERVE`, exiba o valor de `ACRES` da maior área de preservação natural localizada nesse estado.
+3.  Na Tabela resultante anterior,  ordene os resultados pelos valores máximos, em ordem decrescente.
+4.  Exiba o tamanho, em acres, da maior área de preservação natural de cada estado, desde que esse valor seja inferior a 25.000 acres.
+5.  Para cada estado mencionado na tabela `PRESERVE`, exiba o número de acres da menor área de preservação do estado, desde que esse número seja inferior a 100 acres.
+6.  Considere apenas as áreas de preservação natural com mais de 1.000 acres. Para cada estado, exiba o nome e o tamanho (em acres) da maior área de preservação natural desse estado, desde que esse valor seja inferior a 25.000 acres.
+7.  Exiba o estado e o tamanho total, em acres, das áreas de preservação localizadas nesse estado, desde que o tamanho total seja maior ou igual a 10.000 acres e menor ou igual a 50.000 acres.
+8.  Determine a quantidade média de acres das áreas de preservação para cada estado e, em seguida, exiba a maior dessas médias.
+
+Os seguintes exercícios utilizam a tabela `EMPLOYEE`
+
+9.  Para todos os valores de `DNO` dos departamentos encontrados na tabela `EMPLOYEE`, exiba o valor de `DNO`, seguido pelo salário médio daquele departamento.
+10. Para todos os valores de `DNO` dos departamentos encontrados na tabela `EMPLOYEE`, exiba o valor de `DNO`, seguido pela soma, pelo máximo e pelo mínimo dos salários daquele departamento.
+11. Considere todos os departamentos, exceto o Departamento 40. Para esses departamentos, exiba o valor de `DNO`, seguido pelo número de funcionários que trabalham em cada departamento.
+12. Para cada departamento, determine o número total de funcionários que trabalham naquele departamento. Suponha que a coluna SALARY contenha dados confidenciais e que alguém possa deduzir essas informações confidenciais examinando o total dos salários de cada departamento. Portanto, decida exibir apenas os departamentos nos quais o número de funcionários seja superior a dois.
+13. Escreva uma solução que possa ser utilizada para reproduzir a seguinte tabela.
+
+| STATE  | SUM (ACRES) |
+|:----------:|:---------------:|
+| AZ | 51360 |
+| MA | 1760 |
+| MT | 16931 |
+| Total | 70051 |
+
+:::
+
