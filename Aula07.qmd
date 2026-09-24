@@ -1,0 +1,263 @@
+---
+title: "GROUP BY II"
+format: 
+  html:
+    code-fold: true
+execute:
+  eval: true
+  echo: true
+---
+
+## Intruções
+
+- No arquivo `purchase.sqlite` encontram-se as tabelas `PURCHASE` criada especialmente para esta aula.
+- Configure o Rstudio (Posit Cloud) para trabalhar com `SQLIte` e importa o banco de dados `purchase.sqlite`
+
+## Configurando Rstudio
+
+```{r, echo=TRUE, warning=FALSE}
+library(DBI)
+library(RSQLite)
+knitr::opts_chunk$set(max.print = Inf)
+# Conecta/Cria o arquivo
+con <- dbConnect(RSQLite::SQLite(), "purchase.sqlite")
+```
+
+## Tabela
+
+```{sql connection=con, eval=TRUE}
+SELECT * FROM PURCHASE
+```
+
+
+Cada linha da tabela `PURCHASE` contém informações sobre a compra de uma peça de um fornecedor, realizada por um funcionário, para uso em um projeto
+
+- Cada peça é identificada por um número da peça (`PNO`);
+- Cada fornecedor é identificado por um número do fornecedor (`SNO`);
+- Cada funcionário é identificado por um número do funcionário (`ENO`);
+- Cada projeto é identificado por um número do projeto (`PJNO`).
+
+Essas quatro colunas contêm dados do tipo cadeia de caracteres (string). As próximas três colunas contêm valores inteiros. São elas:
+
+- `PURDAY`: Data da compra. Aqui, 1 representa o primeiro dia do ano corrente, 2 representa o segundo dia do ano corrente, e assim por diante.
+- `COST`: Custo da peça, em dólares.
+- `DISCOUNT`: Valor do desconto, que pode variar de zero até o valor total de COST da peça.
+
+# GROUP BY
+
+1.  Consulte a tabela `PURCHASE`. Para cada projeto, exiba seu número de projeto (`PJNO`), seguido pelo custo total de todas as peças compradas para o projeto. Ordene o resultado pelos valores de PJNO.
+
+```{sql connection=con}
+SELECT PJNO, SUM(COST) FROM PURCHASE
+GROUP BY PJNO
+ORDER BY PJNO
+```
+
+2.  Consulte a tabela `PURCHASE`. Para cada fornecedor, exiba seu número de fornecedor (`SNO`), seguido pelo custo total de todas as peças compradas do fornecedor.
+
+
+```{sql connection=con}
+SELECT SNO, SUM(COST) FROM PURCHASE
+GROUP BY SNO
+```
+
+3.  Consulte a tabela `PURCHASE`. Para cada projeto que utilizou peças fornecidas por algum fornecedor, exiba o número do projeto (`PJNO`), seguido pelo número do fornecedor (`SNO`) e pelo custo total das peças do projeto compradas desse fornecedor. Ordene o resultado por `SNO` dentro de cada `PJNO`.
+
+```{sql connection=con}
+SELECT PJNO, SNO, SUM(COST) AS CUSTO_TOTAL FROM PURCHASE
+GROUP BY PJNO, SNO
+ORDER BY PJNO, SNO
+```
+
+4.  Para cada fornecedor que vendeu pelo menos uma peça para ser utilizada em algum projeto, exiba o valor `SNO` do fornecedor, seguido pelo valor `PJNO` do projeto e pelo custo total das peças que o fornecedor forneceu para o projeto. Ordene o resultado por `PJNO` dentro de cada `SNO`.
+
+
+```{sql connection=con}
+SELECT SNO, PJNO, SUM(COST) AS CUSTO FROM PURCHASE
+GROUP BY SNO, PJNO
+ORDER BY SNO, PJNO
+```
+
+5.  Consulte a tabela `PURCHASE`. Para cada funcionário que comprou peças de um fornecedor, exiba o valor `ENO` do funcionário, seguido pelo valor `SNO` do fornecedor e, em seguida, pelo custo total das peças que o funcionário comprou desse fornecedor.
+
+```{sql connection=con}
+SELECT ENO, SNO, SUM(COST) AS CUSTO FROM PURCHASE
+GROUP BY ENO, SNO
+```
+
+6.  Consulte a tabela `PURCHASE`. Para cada projeto em que um funcionário comprou uma peça de um fornecedor para ser utilizada no projeto, exiba os respectivos valores `PJNO`, `ENO` e `SNO`, seguidos pelo custo total das peças compradas pelo funcionário do fornecedor para o projeto. Ordene o resultado por `SNO` dentro de `ENO`, dentro de `PJNO`.
+
+```{sql connection=con}
+SELECT PJNO, ENO, SNO, SUM(COST) AS CUSTO FROM PURCHASE
+GROUP BY PJNO, ENO, SNO
+ORDER BY PJNO, ENO, SNO
+```
+
+7.  Consulte a tabela `PURCHASE`. Para cada projeto em que um funcionário comprou uma peça de um fornecedor para ser utilizada no projeto, exiba os respectivos valores `PJNO`, `ENO`, `SNO` e `PNO`, seguidos pelo custo total de cada peça comprada pelo funcionário do fornecedor para o projeto. Ordene o resultado por `PNO` dentro de `SNO`, dentro de `ENO`, dentro de `PJNO`.
+
+```{sql connection=con}
+SELECT PJNO, ENO, SNO, PNO, SUM(COST) AS CUSTO FROM PURCHASE
+GROUP BY PJNO, SNO, ENO, PNO
+ORDER BY PJNO, ENO, SNO, PNO
+```
+
+
+::: {.callout-tip}
+# Sintaxe
+```{sql connection=con, eval = FALSE}
+SELECT COL1, COL2, COL3, AGG-FUN1, AGG-FUN2
+FROM _______
+WHERE ________
+GROUP BY COL1, COL2, COL3
+HAVING __________
+ORDER BY COL1, COL2, COL3
+```
+:::
+
+8.  Consulte a tabela `PURCHASE`. Considere apenas as compras realizadas pelo funcionário E1. Para cada fornecedor do qual o funcionário E1 comprou uma peça, exiba os respectivos valores `ENO` e `SNO`, seguidos pelo custo total, custo máximo e custo mínimo das compras realizadas pelo funcionário `E1` de cada fornecedor.
+
+
+```{sql connection=con}
+SELECT SNO, ENO, SUM(COST) AS CUSTO, MAX(COST) AS MAXIMO, MIN(COST) AS MINIMO FROM PURCHASE
+WHERE ENO = 'E1'
+GROUP BY ENO, SNO
+```
+
+9.  Estamos interessados em saber se algum fornecedor vendeu a mesma peça por preços diferentes (ou seja, se todas as compras que apresentam a mesma combinação de valores (`SNO`, `PNO`) possuem o mesmo valor de `COST`). Para qualquer fornecedor que tenha cobrado preços diferentes pela mesma peça, exiba as seguintes informações:
+
+- Os respectivos valores de `SNO` e `PNO`;
+- O COST mínimo (`MINCOST`) para cada par de valores (`SNO`, `PNO`);
+- O COST máximo (`MAXCOST`) para cada par de valores (`SNO`, `PNO`);
+- A diferença (`COSTDIFF`) entre os custos máximo e mínimo;
+- Exiba apenas as linhas em que os custos máximo e mínimo sejam diferentes;
+- Exiba as informações na seguinte sequência de colunas: SNO, PNO, MAXCOST, MINCOST, COSTDIFF;
+- Ordene o resultado em ordem decrescente por COSTDIFF. Em caso de valores de COSTDIFF iguais, ordene por PNO (crescente) dentro de SNO (crescente).
+
+
+```{sql connection=con}
+SELECT SNO, PNO, MAX(COST) AS MAXCOST, MIN(COST) AS MINCOST, MAX(COST) - MIN(COST) AS COSTDIFF
+FROM PURCHASE
+GROUP BY SNO, PNO
+HAVING COSTDIFF <> 0
+ORDER BY COSTDIFF DESC, SNO, PNO
+```
+
+
+# Funções individuais
+
+::: {.callout-important}
+# Definição
+Uma função individual opera sobre um valor de uma única linha e retorna um único valor para essa mesma linha.
+
+- `ROUND(N, M)` — Arredonda `N` para `M` casas decimais.
+- `TRUNC(N, M)` — Trunca `N` para `M` casas decimais. [SQLite: não funciona (mas pode tentar com `CAST()`)]
+- `ABS(N)` — Retorna o valor absoluto de `N`.
+- `SIGN(N)` — Retorna `1` se `N > 0`, `0` se `N = 0` e `-1` se `N < 0`.
+- `MOD(N, M)` — Retorna o resto da divisão de `N` por `M`. [SQLite: `%`]
+- `POWER(N, M)` — Retorna `N` elevado à potência `M`.
+- `SQRT(N)` — Retorna a raiz quadrada de `N`.
+
+:::
+
+<div style="text-align: center;">
+```{mermaid}
+flowchart TD
+    A["SQL"] --> B["COMO OPERA?"]
+    A --> C["O QUE CALCULA?"]
+
+    B --> D["SINGLE-ROW<br/>(individual)"]
+    B --> E["AGGREGATE<br/>(agregação)"]
+
+    D --> F["Uma linha"]
+    E --> G["Várias linhas"]
+
+    F --> H["SQRT()<br/>ROUND()<br/>ABS()<br/>LENGTH()"]
+    G --> I["AVG()<br/>SUM()<br/>MAX()<br/>COUNT()"]
+
+    C --> J["ARITMÉTICA"]
+    J --> K["Adição: +<br/>Subtração: -<br/>Multiplicação: *<br/>Divisão: /"]
+```
+</div>
+
+
+```{r, echo=TRUE, warning=FALSE}
+dbDisconnect(con)
+knitr::opts_chunk$set(max.print = Inf)
+# Conecta/Cria o arquivo
+con <- dbConnect(RSQLite::SQLite(), "demo2.sqlite")
+```
+
+```{sql connection=con}
+SELECT * FROM DEMO2
+```
+
+10. Aplicar na coluna `D1` da tabela `DEMO2` todas as funções individuais listadas.
+
+
+```{sql connection=con}
+SELECT D1, 
+ROUND(D1, 1) AS ROUND1,
+CAST(D1 AS INTEGER) AS TRUNC0,
+ABS(D1) AS ABSVAL,
+SIGN(D1) AS SINAL,
+ROUND(D1,0) % 2 AS RESTO,
+POWER(D1, 2) AS QUADRADO,
+POWER(D1, 3) AS CUBO,
+SQRT(ABS(D1)) AS RAIZ
+FROM DEMO2
+```
+
+12. Calcule a soma dos valores absolutos de `D1`,
+
+```{sql connection=con}
+SELECT SUM(ABS(D1)) FROM DEMO2
+```
+13. Também existem funções individuais que podemos aplicar a STRINGS. Veremos elas no exemplo a seguir:
+
+```{sql connection=con}
+SELECT V1, F1,
+LENGTH(V1), 
+UPPER(F1), 
+LOWER(V1), 
+LTRIM(V1), 
+RTRIM(V1), 
+SUBSTR(V1, 3, 5), 
+CONCAT(V1, UPPER(F1))
+FROM DEMO2
+```
+
+::: {.callout-important}
+# Funções individuais para STRING
+
+| Função / operador | Descrição |
+|:---|:---|
+| `LENGTH(C)` | Retorna o comprimento de `C`. |
+| `UPPER(C)` | Retorna `C` em letras maiúsculas. |
+| `LOWER(C)` | Retorna `C` em letras minúsculas. |
+| `LTRIM(C)` | Retorna `C` removendo os espaços em branco à esquerda. |
+| `RTRIM(C)` | Retorna `C` removendo os espaços em branco à direita. |
+| `SUBSTR(C, I, L)` | Retorna uma substring de `C`, iniciando no caractere `I` e com comprimento `L`. |
+| `CONCAT(C1, C2)` | Concatena os valores de `C1` e `C2`. |
+:::
+
+13. Qual a diferença entre `TRIM()` e `REPLACE()`?
+
+```{sql connection=con}
+SELECT V1, TRIM(V1), REPLACE(V1, ' ', '') FROM DEMO2
+```
+
+
+# Hands-On
+
+::: {.callout-note}
+# Lista 6
+
+1.  Consulte a tabela `PURCHASE`. Para cada peça, exiba seu número da peça (`PNO`), seguido pelo custo total de todas as compras dessa peça.
+2.  Consulte a tabela `PURCHASE`. Para cada funcionário que comprou uma peça, exiba seu número de funcionário (`ENO`), seguido pelo custo total de todas as peças compradas pelo funcionário.
+3. Consulte a tabela `PURCHASE`. Calcule o total de `COST` para cada combinação de valores de (`PJNO`, `ENO`). Exiba essas colunas, da esquerda para a direita, na sequência (`PJNO`, `ENO`), seguidas pelo custo total. Ordene o resultado em ordem crescente por (`PJNO`, `ENO`).
+4. Consulte a tabela `PURCHASE`. Calcule o total de `COST` para cada combinação de valores de (`PNO`, `SNO`). Exiba essas colunas, da esquerda para a direita, na sequência (`PNO`, `SNO`), seguidas pelo custo total. Ordene o resultado em ordem crescente por (`PNO`, `SNO`).
+5. Consulte a tabela `PURCHASE`. Calcule o total de `COST` para cada combinação de valores de (`PJNO`, `ENO`, `SNO`). Exiba essas colunas, da esquerda para a direita, na sequência (`PJNO`, `ENO`, `SNO`), seguidas pelo custo total. Ordene o resultado em ordem crescente por (`PJNO`, `ENO`, `SNO`).
+6. Consulte a tabela `PURCHASE`. Calcule o total de `COST` para cada combinação de valores de (`PNO`, `SNO`, `ENO`). Exiba essas colunas, da esquerda para a direita, na sequência (`PNO`, `SNO`, `ENO`), seguidas pelo custo total. Ordene o resultado em ordem crescente por (`PNO`, `SNO`, `ENO`).
+7.  Consulte a tabela `PURCHASE`. Exclua da análise todas as linhas associadas ao projeto `PJ2`. Exiba o total de `COST` para cada combinação de valores (`PJNO`, `ENO`, `SNO`).
+8.  Consulte a tabela `PURCHASE`. Exiba o `COST` total para cada combinação de valores (`PNO`, `SNO`, `ENO`) cujo total seja maior ou igual a 2000.
+:::
