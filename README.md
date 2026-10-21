@@ -14,6 +14,7 @@
 | Expressões aritméticas e funções de agregação  | [Link](https://ctruciosm.github.io/SQL4Statisticians/Aula05.html)|
 | GROUP BY I  | [Link](https://ctruciosm.github.io/SQL4Statisticians/Aula06.html)|
 | GROUP BY II  | [Link](https://ctruciosm.github.io/SQL4Statisticians/Aula07.html)|
+| TABLES  | [Link](https://ctruciosm.github.io/SQL4Statisticians/Aula08.html)|
 
 
 
