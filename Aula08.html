@@ -81,10 +81,36 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </head>
 
-<body class="fullcontent quarto-light">
+<body class="quarto-light">
 
 <div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
-
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#configurando-rstudio" id="toc-configurando-rstudio" class="nav-link active" data-scroll-target="#configurando-rstudio">Configurando Rstudio</a></li>
+  <li><a href="#create-table" id="toc-create-table" class="nav-link" data-scroll-target="#create-table">CREATE TABLE</a>
+  <ul class="collapse">
+  <li><a href="#exemplo-1" id="toc-exemplo-1" class="nav-link" data-scroll-target="#exemplo-1">Exemplo 1:</a></li>
+  <li><a href="#exemplo-2" id="toc-exemplo-2" class="nav-link" data-scroll-target="#exemplo-2">Exemplo 2</a></li>
+  <li><a href="#exemplo-3" id="toc-exemplo-3" class="nav-link" data-scroll-target="#exemplo-3">Exemplo 3</a></li>
+  <li><a href="#exemplo-4" id="toc-exemplo-4" class="nav-link" data-scroll-target="#exemplo-4">Exemplo 4</a>
+  <ul class="collapse">
+  <li><a href="#caso-1" id="toc-caso-1" class="nav-link" data-scroll-target="#caso-1">Caso 1</a></li>
+  <li><a href="#caso-2" id="toc-caso-2" class="nav-link" data-scroll-target="#caso-2">Caso 2</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#criando-uma-tabela-padrão" id="toc-criando-uma-tabela-padrão" class="nav-link" data-scroll-target="#criando-uma-tabela-padrão">Criando uma Tabela Padrão</a></li>
+  <li><a href="#alter-table" id="toc-alter-table" class="nav-link" data-scroll-target="#alter-table">ALTER TABLE</a></li>
+  <li><a href="#do-csvxlsx-ao-sql" id="toc-do-csvxlsx-ao-sql" class="nav-link" data-scroll-target="#do-csvxlsx-ao-sql">Do CSV/XLSX ao SQL</a>
+  <ul class="collapse">
+  <li><a href="#como-é-essa-tabela" id="toc-como-é-essa-tabela" class="nav-link" data-scroll-target="#como-é-essa-tabela">Como é essa Tabela?</a></li>
+  <li><a href="#reconfigurando-a-tabela-not-null-default-pk" id="toc-reconfigurando-a-tabela-not-null-default-pk" class="nav-link" data-scroll-target="#reconfigurando-a-tabela-not-null-default-pk">Reconfigurando a Tabela (NOT NULL, DEFAULT, PK)</a></li>
+  </ul></li>
+  </ul>
+</nav>
+</div>
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
@@ -117,8 +143,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<section id="configurando-rstudio" class="level2">
-<h2 class="anchored" data-anchor-id="configurando-rstudio">Configurando Rstudio</h2>
+<section id="configurando-rstudio" class="level1">
+<h1>Configurando Rstudio</h1>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DBI)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(RSQLite)</span>
@@ -129,8 +155,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="create-table" class="level1">
 <h1>CREATE TABLE</h1>
-<section id="exemplo-1-o-que-faz-o-seguinte-código" class="level2">
-<h2 class="anchored" data-anchor-id="exemplo-1-o-que-faz-o-seguinte-código">Exemplo 1: O que faz o seguinte código?</h2>
+<section id="exemplo-1" class="level2">
+<h2 class="anchored" data-anchor-id="exemplo-1">Exemplo 1:</h2>
+<p><strong>O que faz o seguinte código?</strong></p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -159,9 +186,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="kw">DROP</span> <span class="kw">TABLE</span> DOG;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-</section>
-<section id="vejamos-passo-a-passo" class="level2">
-<h2 class="anchored" data-anchor-id="vejamos-passo-a-passo">Vejamos passo a passo</h2>
+<p><strong>Vejamos passo a passo</strong></p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -418,9 +443,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </section>
-</section>
-<section id="exemplo-3" class="level1">
-<h1>Exemplo 3</h1>
+<section id="exemplo-3" class="level2">
+<h2 class="anchored" data-anchor-id="exemplo-3">Exemplo 3</h2>
 <ul>
 <li>Repita a questão anteior mas dessa vez defina a coluna <code>MNO</code> como <code>PRIMARY KEY</code> (que evita valores duplicados)</li>
 <li>Para evitar inserir valores duplicado na tabela, utilize:
@@ -527,6 +551,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </table>
 </div>
 </div>
+</section>
 <section id="exemplo-4" class="level2">
 <h2 class="anchored" data-anchor-id="exemplo-4">Exemplo 4</h2>
 <p>Qual a diferença ente ambas as QUERYS?</p>
@@ -873,8 +898,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p><img src="dados_sql.png" class="img-fluid"></p>
 </section>
-<section id="crei-uma-tabela-mas-quero-alterar-suas-configurações" class="level1">
-<h1>Crei uma tabela mas quero alterar suas configurações</h1>
+<section id="alter-table" class="level1">
+<h1>ALTER TABLE</h1>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -1139,6 +1164,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="do-csvxlsx-ao-sql" class="level1">
 <h1>Do CSV/XLSX ao SQL</h1>
 <p>O arquivo <code>Fish.csv</code>, contém sete características de 159 peixes de uma lagoa localizada em “Wakanda”. Estamos interessados em importar essa tabela no nosso bando de dados SQL.</p>
+<p><img src="csv_photo.png" class="img-fluid"></p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -2680,8 +2706,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </section>
-<section id="queremos-configurar-a-tabela-de-melhor-forma-tendo-not-null-pk" class="level2">
-<h2 class="anchored" data-anchor-id="queremos-configurar-a-tabela-de-melhor-forma-tendo-not-null-pk">Queremos configurar a tabela de melhor forma (tendo NOT NULL, PK)</h2>
+<section id="reconfigurando-a-tabela-not-null-default-pk" class="level2">
+<h2 class="anchored" data-anchor-id="reconfigurando-a-tabela-not-null-default-pk">Reconfigurando a Tabela (NOT NULL, DEFAULT, PK)</h2>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -2776,6 +2802,26 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 </tbody>
 </table>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>PRAGMA
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>No SQLite, <code>PRAGMA</code> é um comando especial usado para consultar ou modificar configurações e informações internas do banco de dados.</p>
+<ul>
+<li><code>PRAGMA table_info(TABLE)</code>; Mostra as colunas da tabela FISH, seus tipos e restrições.</li>
+<li><code>PRAGMA database_list</code>; Lista os bancos de dados conectados.</li>
+<li><code>PRAGMA foreign_keys</code>; Verifica se as chaves estrangeiras estão habilitadas.</li>
+<li><code>PRAGMA foreign_keys = ON</code>; Habilita a verificação de chaves estrangeiras.</li>
+<li><code>PRAGMA integrity_check</code>;</li>
+</ul>
 </div>
 </div>
 <div class="cell">

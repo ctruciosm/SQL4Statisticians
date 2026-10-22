@@ -5,6 +5,7 @@ description: "Como criar, modificar ou apagar tabelas? Qual a diferença entre f
 format: 
   html:
     code-fold: true
+toc: true
 execute:
   eval: true
   echo: true
@@ -13,7 +14,7 @@ execute:
 
 
 
-## Configurando Rstudio
+# Configurando Rstudio
 
 ```{r, echo=TRUE, warning=FALSE}
 #| code-fold: FALSE
@@ -26,7 +27,9 @@ con <- dbConnect(RSQLite::SQLite(), "criando_tabelas.sqlite")
 
 # CREATE TABLE
 
-## Exemplo 1: O que faz o seguinte código?
+## Exemplo 1: 
+
+**O que faz o seguinte código?**
 
 
 ```{sql connection=con, eval=FALSE}
@@ -56,7 +59,7 @@ DROP TABLE DOG;
 ```
 
 
-## Vejamos passo a passo
+**Vejamos passo a passo**
 
 
 
@@ -176,7 +179,7 @@ for (cmd in commands) {
 SELECT * FROM MAN
 ```
 
-# Exemplo 3
+## Exemplo 3
 
 - Repita a questão anteior mas dessa vez defina a coluna `MNO` como `PRIMARY KEY` (que evita valores duplicados)
 - Para evitar inserir valores duplicado na tabela, utilize:
@@ -394,7 +397,7 @@ knitr::kable(dbGetQuery(con, "SELECT * FROM EXEMPLO"))
 ![](dados_sql.png)
 
 
-# Crei uma tabela mas quero alterar suas configurações
+#  ALTER TABLE
 
 
 ::: {.callout-note}
@@ -459,6 +462,8 @@ dbDisconnect(con)
 O arquivo `Fish.csv`, contém sete características de 159 peixes de uma lagoa localizada em "Wakanda". Estamos interessados em importar essa tabela no nosso bando de dados SQL.
 
 
+![](csv_photo.png)
+
 
 ```{r, eval=TRUE, echo=TRUE, warning=FALSE}
 library(DBI)
@@ -475,7 +480,7 @@ knitr::kable(dbGetQuery(con, "SELECT * FROM FISH"))
 PRAGMA table_info(FISH);
 ```
 
-## Queremos configurar a tabela de melhor forma (tendo NOT NULL, PK)
+## Reconfigurando a Tabela (NOT NULL, DEFAULT, PK)
 
 ```{sql connection=con}
 DROP TABLE IF EXISTS NEW_FISH
@@ -501,6 +506,19 @@ SELECT SPECIES, WEIGHT, LENGTH1, HEIGHT, WIDTH FROM FISH;
 ```{sql connection=con}
 PRAGMA table_info(NEW_FISH);
 ```
+
+::: {.callout-tip}
+## PRAGMA
+No SQLite, `PRAGMA` é um comando especial usado para consultar ou modificar configurações e informações internas do banco de dados.
+
+- `PRAGMA table_info(TABLE)`;	Mostra as colunas da tabela FISH, seus tipos e restrições.
+- `PRAGMA database_list`;	Lista os bancos de dados conectados.
+- `PRAGMA foreign_keys`;	Verifica se as chaves estrangeiras estão habilitadas.
+- `PRAGMA foreign_keys = ON`;	Habilita a verificação de chaves estrangeiras.
+- `PRAGMA integrity_check`;
+
+:::
+
 
 
 ```{sql connection=con}
