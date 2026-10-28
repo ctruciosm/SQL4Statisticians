@@ -1,0 +1,303 @@
+---
+title: "Joins"
+author: "Carlos Trucíos"
+format: 
+  html:
+    code-fold: true
+toc: true
+execute:
+  eval: true
+  echo: true
+---
+
+
+
+
+# Configurando Rstudio
+
+```{r, echo=TRUE, warning=FALSE}
+#| code-fold: FALSE
+library(DBI)
+library(RSQLite)
+knitr::opts_chunk$set(max.print = Inf)
+# Conecta/Cria o arquivo
+con <- dbConnect(RSQLite::SQLite(), "join_tables.sqlite")
+```
+
+# SQL
+
+
+1.  Unir as Tabelas `EMPLOYEE` e `DEPARTMENT`
+
+```{sql connection=con}
+PRAGMA table_info(EMPLOYEE)
+```
+
+
+```{sql connection=con}
+PRAGMA table_info(DEPARTMENT)
+```
+
+
+```{sql connection=con}
+SELECT *
+FROM EMPLOYEE, DEPARTMENT
+WHERE EMPLOYEE.DNO = DEPARTMENT.DNO
+```
+
+
+::: {.callout-note}
+## Step by Step
+1.  Identifique as tabelas necessárias para responder à consulta.
+2.  Determine a condição do JOIN: quais colunas serão utilizadas para relacionar as tabelas?
+3.  Defina os critérios de filtragem utilizando a cláusula WHERE, quando necessário.
+:::
+
+
+::: {.callout-warning}
+## Cuidado
+```{sql connection=con}
+SELECT *
+FROM EMPLOYEE, DEPARTMENT
+```
+:::
+
+
+> Um INNER JOIN um pouco mais avançado?
+
+
+```{sql connection=con}
+SELECT DNAME, ENAME, SALARY, EMPLOYEE.DNO
+FROM EMPLOYEE, DEPARTMENT
+WHERE EMPLOYEE.DNO = DEPARTMENT.DNO AND SALARY < 3000.00
+ORDER BY DNAME, ENAME
+```
+
+2.  Faça um INNER JOIN das Tabelas `EMPLOYEE` e `DEPARTMENT`. Considere apenas os funcionários que recebem um salário inferior a US$ 999,00. Se algum desses funcionários trabalhar em um departamento cujo orçamento seja inferior ou igual a US$ 75.000,00, exiba os valores das colunas DNO e BUDGET do departamento, juntamente com os valores das colunas ENAME e SALARY do funcionário. Ordene o resultado pela coluna DNO.
+
+```{sql connection=con}
+SELECT DEPARTMENT.DNO, BUDGET, ENAME, SALARY
+FROM EMPLOYEE, DEPARTMENT
+WHERE DEPARTMENT.DNO = EMPLOYEE.DNO AND SALARY < 999.00 AND BUDGET <= 75000.00
+ORDER BY DEPARTMENT.DNO
+```
+
+3.  Exiba o número e o nome de qualquer funcionário que trabalhe em um departamento cujo orçamento seja maior ou igual a US$ 25.000,00.
+
+```{sql connection=con}
+SELECT ENO, ENAME
+FROM EMPLOYEE, DEPARTMENT
+WHERE EMPLOYEE.DNO = DEPARTMENT.DNO AND BUDGET >= 25000.00
+
+```
+
+
+4. A Tabela `EMPLOYEE2` é semelhante à TABELA `EMPLOYEE` mas 'FOREIGN KEY' não foi definida como tendo valores não nulos. O que irá aconceter quando fizermos um INNER JOIN de `EMPLOYEE2` e `DEPARTMENT`?
+
+
+```{sql connection=con}
+PRAGMA table_info(EMPLOYEE2)
+```
+
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{sql connection=con}
+SELECT * FROM EMPLOYEE
+```
+
+:::
+
+::: {.column width="50%"}
+```{sql connection=con}
+SELECT * FROM EMPLOYEE2
+```
+:::
+::::
+
+
+
+```{sql connection=con}
+SELECT *
+FROM EMPLOYEE2, DEPARTMENT
+WHERE EMPLOYEE2.DNO = DEPARTMENT.DNO
+```
+
+5. A Tabela `EMPLOYEE3` é identica à `EMPLOYEE2` mas nela, nenhuma coluna foi definida como PRIMARY KEY OU FOREIGN KEY e o `DNO` para 'MOE' foi alterado de 20 para 99. Faça um INNER JOIN com `DEPARTMENT` e veja o que acontece.
+
+:::: {.columns}
+
+::: {.column width="33%"}
+```{sql connection=con}
+SELECT * FROM EMPLOYEE
+```
+
+:::
+
+::: {.column width="33%"}
+```{sql connection=con}
+SELECT * FROM EMPLOYEE2
+```
+:::
+
+::: {.column width="33%"}
+```{sql connection=con}
+SELECT * FROM EMPLOYEE3
+```
+:::
+::::
+
+
+
+```{sql connection=con}
+SELECT *
+FROM EMPLOYEE3, DEPARTMENT
+WHERE EMPLOYEE3.DNO = DEPARTMENT.DNO
+```
+
+
+6.  Existem várias formas de fazer INNER JOIN, até agora temos visto a forma antiga. Veja os seguintes códigos e rafa-ze as questões acima com o estilo que mais gostar.
+
+```{sql connection=con}
+SELECT *
+FROM EMPLOYEE, DEPARTMENT
+WHERE EMPLOYEE.DNO = DEPARTMENT.DNO
+```
+
+
+```{sql connection=con}
+SELECT *
+FROM EMPLOYEE E, DEPARTMENT D
+WHERE E.DNO = D.DNO
+```
+
+
+```{sql connection=con}
+SELECT *
+FROM EMPLOYEE INNER JOIN DEPARTMENT
+ON EMPLOYEE.DNO = DEPARTMENT.DNO
+```
+
+```{sql connection=con}
+SELECT *
+FROM EMPLOYEE E INNER JOIN DEPARTMENT D
+ON E.DNO = D.DNO
+```
+
+
+::: {.callout-tip}
+## Dica
+Embora todas as formas sejam equivalente, alguns preferem utilizar explicitamente a cláusula INNER JOIN. Isto por alguns motivos:
+
+1.  Na cláudula ON fica claro qual a variável para fazer a junção das Tabelas e deixamos a clausula WHERE para as condições mesmo
+2.  Você se acostuma a utilizar o INEER JOINT e mudar pro OUTER JOIN é simples
+3.  A sintaxe em si é mais clara
+:::
+
+
+7. Reescreva a QUERY abaixo utilizando:
+
+  a.    Alias DP para DEPARTMENT e EMP para EMPLOYEE
+  b.    Utilizando de JOIN-ON sintaxe (sem alias)
+  c.    Utilizando de JOIN-ON sintaxe (com alias)
+  
+
+```{sql connection=con}
+SELECT DEPARTMENT.DNO, ENAME
+FROM DEPARTMENT, EMPLOYEE
+WHERE DEPARTMENT.DNO = EMPLOYEE.DNO
+AND BUDGET > 21000
+ORDER BY DEPARTMENT.DNO, ENAME
+```
+
+8.  Para todos os funcionários, exiba seus valores de `ENO` e `SALARY`, juntamente com os valores de `DNO` e `BUDGET` do departamento ao qual pertencem. Exiba também a proporção entre o salário de cada funcionário e o orçamento de seu departamento.
+
+```{sql connection=con}
+SELECT E.ENO, E.SALARY, D.DNO, D.BUDGET, 1.0 * E.SALARY/D.BUDGET
+FROM DEPARTMENT D, EMPLOYEE E
+WHERE D.DNO = E.DNO
+```
+
+9.  Exiba o salário total dos funcionários que trabalham em um departamento com orçamento menor ou igual a US$ 50.000,00.
+
+```{sql connection=con}
+SELECT SUM(E.SALARY)
+FROM DEPARTMENT D INNER JOIN EMPLOYEE E
+ON D.DNO = E.DNO
+WHERE D.BUDGET <= 50_000.00
+```
+
+10. Consulte as tabelas `DEPARTMENT` e `EMPLOYEE`. Para cada departamento que possua pelo menos um funcionário, exiba o número do departamento e o salário total de todos os funcionários que trabalham nele.
+
+```{sql connection=con}
+SELECT D.DNO, SUM(E.SALARY)
+FROM DEPARTMENT D INNER JOIN EMPLOYEE E
+ON D.DNO = E.DNO
+GROUP BY D.DNO
+```
+
+
+11..  Consulte as tabelas DEPARTMENT e EMPLOYEE. Para cada departamento que possua pelo menos um funcionário, exiba o nome do departamento e o salário total de todos os funcionários que trabalham nele.
+
+
+```{sql connection=con}
+SELECT D.DNAME, SUM(E.SALARY)
+FROM DEPARTMENT D INNER JOIN EMPLOYEE E
+ON D.DNO = E.DNO
+GROUP BY D.DNAME
+```
+
+
+12. Estamos interessados apenas nos departamentos que possuem funcionários e cujo nome do departamento começa com a letra A. Exiba os nomes dos departamentos e as médias salariais de todos os funcionários que trabalham nesses departamentos.
+
+```{sql connection=con}
+SELECT D.DNAME, AVG(E.SALARY)
+FROM DEPARTMENT D INNER JOIN EMPLOYEE E
+ON D.DNO = E.DNO
+WHERE D.DNAME LIKE 'A%'
+GROUP BY D.DNAME
+```
+
+13. Existe algum funcionário com um salário tão elevado que supere o orçamento de determinado departamento? Em caso afirmativo, exiba o nome do funcionário, seu salário e o número do departamento, seguidos pelo número do departamento correspondente e seu respectivo orçamento.
+
+```{sql connection=con}
+SELECT E.ENAME, E.SALARY, E.DNO AS EMPDNO, D.DNO AS DPTODNO, D.BUDGET
+FROM DEPARTMENT D, EMPLOYEE E
+WHERE E.SALARY > D.BUDGET
+```
+
+
+::: {.callout-tip}
+## Theta-join
+Quando a operação de junção é baseada em qualquer operação de comparação (não apenas na igualdade).
+:::
+
+
+14. Algum funcionário possui um salário maior ou igual a um terço do orçamento de qualquer departamento? Em caso afirmativo, exiba o nome do funcionário, seu salário e o número do seu departamento, seguidos pelo número do departamento correspondente e seu respectivo orçamento.
+
+```{sql connection=con}
+SELECT E.ENAME, E.SALARY, E.DNO AS EMPDNO, D.DNO, D.BUDGET
+FROM DEPARTMENT D, EMPLOYEE E
+WHERE E.SALARY >= D.BUDGET / 3.0
+```
+
+
+15. Algum funcionário possui um salário que excede um terço do orçamento do seu próprio departamento? Se sim, exiba o nome do funcionário, seu salário e o número do departamento, seguidos pelo valor do orçamento do seu departamento.
+
+```{sql connection=con}
+SELECT E.ENAME, E.SALARY, E.DNO, D.BUDGET
+FROM DEPARTMENT D INNER JOIN EMPLOYEE E
+ON D.DNO = E.DNO
+WHERE E.SALARY >= D.BUDGET / 3.0
+```
+
+16. Exiba os valores de `ENO`, `ENAME` e `SALARY` para cada par de funcionários que possuam o mesmo valor de `SALARY`.
+
+```{sql connection=con}
+SELECT E1.ENAME, E2.ENAME, E1.SALARY
+FROM EMPLOYEE E1, EMPLOYEE E2
+WHERE E1.SALARY = E2.SALARY AND E1.ENO < E2.ENO
+```
+
+
