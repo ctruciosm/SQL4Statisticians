@@ -10,7 +10,9 @@ execute:
   echo: true
 ---
 
+# Instruções
 
+- Na aula de hoje, utilizaremos o banco de dados `join_tables.sqlite` [que está ni Github](https://github.com/ctruciosm/SQL4Statisticians/blob/main/join_tables.sqlite).
 
 
 # Configurando Rstudio
@@ -25,6 +27,16 @@ con <- dbConnect(RSQLite::SQLite(), "join_tables.sqlite")
 ```
 
 # SQL
+
+
+0. Como ver quais Tabelas estão no nosso banco?
+
+
+```{sql connection=con}
+SELECT name
+FROM sqlite_master
+WHERE type = 'table'
+```
 
 
 1.  Unir as Tabelas `EMPLOYEE` e `DEPARTMENT`
