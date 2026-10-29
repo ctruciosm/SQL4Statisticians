@@ -15,6 +15,7 @@
 | GROUP BY I  | [Link](https://ctruciosm.github.io/SQL4Statisticians/Aula06.html)|
 | GROUP BY II  | [Link](https://ctruciosm.github.io/SQL4Statisticians/Aula07.html)|
 | TABLES  | [Link](https://ctruciosm.github.io/SQL4Statisticians/Aula08.html)|
+| INNER JOIN  | [Link](https://ctruciosm.github.io/SQL4Statisticians/Aula09.html)|
 
 
 
