@@ -1,0 +1,1605 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Carlos Trucíos">
+
+<title>Joins II</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="Aula10_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Aula10_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="Aula10_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="Aula10_files/libs/quarto-html/popper.min.js"></script>
+<script src="Aula10_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="Aula10_files/libs/quarto-html/anchor.min.js"></script>
+<link href="Aula10_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Aula10_files/libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="Aula10_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="Aula10_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="Aula10_files/libs/bootstrap/bootstrap-917079515d91bccb85b543faf8aa8bb6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#instruções" id="toc-instruções" class="nav-link active" data-scroll-target="#instruções">Instruções</a></li>
+  <li><a href="#configurando-rstudio" id="toc-configurando-rstudio" class="nav-link" data-scroll-target="#configurando-rstudio">Configurando Rstudio</a></li>
+  <li><a href="#sql" id="toc-sql" class="nav-link" data-scroll-target="#sql">SQL</a></li>
+  </ul>
+</nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Joins II</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Carlos Trucíos </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="instruções" class="level1">
+<h1>Instruções</h1>
+<ul>
+<li>Na aula de hoje, utilizaremos o banco de dados <code>multijoin.sqlite</code> <a href="https://github.com/ctruciosm/SQL4Statisticians/blob/main/multijoin.sqlite">que está ni Github</a>.</li>
+</ul>
+</section>
+<section id="configurando-rstudio" class="level1">
+<h1>Configurando Rstudio</h1>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DBI)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(RSQLite)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>con <span class="ot">&lt;-</span> <span class="fu">dbConnect</span>(RSQLite<span class="sc">::</span><span class="fu">SQLite</span>(), <span class="st">"multijoin.sqlite"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="sql" class="level1">
+<h1>SQL</h1>
+<ol type="1">
+<li>Quais tabelas temos no banco?</li>
+</ol>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> name</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> sqlite_master</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> <span class="kw">type</span> <span class="op">=</span> <span class="st">'table'</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>8 records</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;">name</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">REGION</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">STATE</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CUSTOMER</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">SUPPLIER</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">PART</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">PARTSUPP</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">PUR_ORDER</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">LINEITEM</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p><img src="MultiJoins.png" class="img-fluid"></p>
+<ol start="2" type="1">
+<li>Acesse as tabelas REGION e STATE. Para cada estado, exiba os valores de STCODE e STNAME, juntamente com os valores RNO e RNAME da região à qual ele pertence. Apresente as colunas na seguinte ordem, da esquerda para a direita: RNO, RNAME, STCODE e STNAME. Ordene o resultado por STCODE dentro de cada RNO (ou seja, primeiro agrupe por RNO e, dentro de cada região, ordene os estados por STCODE).</li>
+</ol>
+<div class="columns">
+<div class="column" style="width:50%;">
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>PRAGMA table_info(REGION)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>3 records</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;">cid</th>
+<th style="text-align: left;">name</th>
+<th style="text-align: left;">type</th>
+<th style="text-align: right;">notnull</th>
+<th style="text-align: left;">dflt_value</th>
+<th style="text-align: right;">pk</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">0</td>
+<td style="text-align: left;">RNO</td>
+<td style="text-align: left;">INTEGER</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1</td>
+<td style="text-align: left;">RNAME</td>
+<td style="text-align: left;">CHAR(10)</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">2</td>
+<td style="text-align: left;">CLIMATE</td>
+<td style="text-align: left;">CHAR(5)</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div><div class="column" style="width:50%;">
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>PRAGMA table_info(STATE)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>4 records</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;">cid</th>
+<th style="text-align: left;">name</th>
+<th style="text-align: left;">type</th>
+<th style="text-align: right;">notnull</th>
+<th style="text-align: left;">dflt_value</th>
+<th style="text-align: right;">pk</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">0</td>
+<td style="text-align: left;">STCODE</td>
+<td style="text-align: left;">CHAR(2)</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1</td>
+<td style="text-align: left;">STNAME</td>
+<td style="text-align: left;">CHAR(15)</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">2</td>
+<td style="text-align: left;">POPULATION</td>
+<td style="text-align: left;">INTEGER</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">3</td>
+<td style="text-align: left;">RNO</td>
+<td style="text-align: left;">INTEGER</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> S.RNO, RNAME, STCODE, STNAME</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> REGION <span class="kw">AS</span> R <span class="kw">INNER</span> <span class="kw">JOIN</span> STATE <span class="kw">AS</span> S</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="kw">ON</span> R.RNO <span class="op">=</span> S.RNO</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="kw">ORDER</span> <span class="kw">BY</span> S.RNO, STCODE</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>8 records</caption>
+<thead>
+<tr class="header">
+<th style="text-align: right;">RNO</th>
+<th style="text-align: left;">RNAME</th>
+<th style="text-align: left;">STCODE</th>
+<th style="text-align: left;">STNAME</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">NORTHEAST</td>
+<td style="text-align: left;">CT</td>
+<td style="text-align: left;">CONNECTICUT</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">NORTHEAST</td>
+<td style="text-align: left;">MA</td>
+<td style="text-align: left;">MASSACHUSETTS</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2</td>
+<td style="text-align: left;">NORTHWEST</td>
+<td style="text-align: left;">OR</td>
+<td style="text-align: left;">OREGON</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2</td>
+<td style="text-align: left;">NORTHWEST</td>
+<td style="text-align: left;">WA</td>
+<td style="text-align: left;">WASHINGTON</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">3</td>
+<td style="text-align: left;">SOUTHEAST</td>
+<td style="text-align: left;">FL</td>
+<td style="text-align: left;">FLORIDA</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">3</td>
+<td style="text-align: left;">SOUTHEAST</td>
+<td style="text-align: left;">GE</td>
+<td style="text-align: left;">GEORGIA</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">4</td>
+<td style="text-align: left;">SOUTHWEST</td>
+<td style="text-align: left;">AZ</td>
+<td style="text-align: left;">ARIZONA</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">4</td>
+<td style="text-align: left;">SOUTHWEST</td>
+<td style="text-align: left;">NM</td>
+<td style="text-align: left;">NEW MEXICO</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<ol start="3" type="1">
+<li>Acesse as tabelas PART e PARTSUPP. Para cada peça que pode ser adquirida de algum fornecedor, exiba os valores PNO e PNAME da peça, o valor SNO do fornecedor e o preço (PSPRICE) pago ao fornecedor pela peça. Apresente as colunas na seguinte ordem, da esquerda para a direita: PNO, PNAME, SNO e PSPRICE. Ordene o resultado por SNO dentro de cada PNO (ou seja, primeiro agrupe por PNO e, dentro de cada peça, ordene os fornecedores por SNO).</li>
+</ol>
+<div class="columns">
+<div class="column" style="width:50%;">
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>4 records</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;">cid</th>
+<th style="text-align: left;">name</th>
+<th style="text-align: left;">type</th>
+<th style="text-align: right;">notnull</th>
+<th style="text-align: left;">dflt_value</th>
+<th style="text-align: right;">pk</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">0</td>
+<td style="text-align: left;">PNO</td>
+<td style="text-align: left;">CHAR(2)</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1</td>
+<td style="text-align: left;">PNAME</td>
+<td style="text-align: left;">CHAR(6)</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">2</td>
+<td style="text-align: left;">PCOLOR</td>
+<td style="text-align: left;">CHAR(6)</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">3</td>
+<td style="text-align: left;">PWT</td>
+<td style="text-align: left;">INTEGER</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div><div class="column" style="width:50%;">
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>3 records</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;">cid</th>
+<th style="text-align: left;">name</th>
+<th style="text-align: left;">type</th>
+<th style="text-align: right;">notnull</th>
+<th style="text-align: left;">dflt_value</th>
+<th style="text-align: right;">pk</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">0</td>
+<td style="text-align: left;">PNO</td>
+<td style="text-align: left;">CHAR(2)</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1</td>
+<td style="text-align: left;">SNO</td>
+<td style="text-align: left;">CHAR(2)</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">2</td>
+<td style="text-align: left;">PSPRICE</td>
+<td style="text-align: left;">DECIMAL(7,2)</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Displaying records 1 - 10</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;">PNO</th>
+<th style="text-align: left;">PNAME</th>
+<th style="text-align: left;">SNO</th>
+<th style="text-align: right;">PSPRICE</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">P1</td>
+<td style="text-align: left;">PART1</td>
+<td style="text-align: left;">S2</td>
+<td style="text-align: right;">10.5</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">P1</td>
+<td style="text-align: left;">PART1</td>
+<td style="text-align: left;">S4</td>
+<td style="text-align: right;">11.0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">P3</td>
+<td style="text-align: left;">PART3</td>
+<td style="text-align: left;">S3</td>
+<td style="text-align: right;">12.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">P3</td>
+<td style="text-align: left;">PART3</td>
+<td style="text-align: left;">S4</td>
+<td style="text-align: right;">12.5</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">P4</td>
+<td style="text-align: left;">PART4</td>
+<td style="text-align: left;">S4</td>
+<td style="text-align: right;">12.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">P5</td>
+<td style="text-align: left;">PART5</td>
+<td style="text-align: left;">S1</td>
+<td style="text-align: right;">10.0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">P5</td>
+<td style="text-align: left;">PART5</td>
+<td style="text-align: left;">S2</td>
+<td style="text-align: right;">10.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">P5</td>
+<td style="text-align: left;">PART5</td>
+<td style="text-align: left;">S4</td>
+<td style="text-align: right;">11.0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">P6</td>
+<td style="text-align: left;">PART6</td>
+<td style="text-align: left;">S4</td>
+<td style="text-align: right;">4.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">P6</td>
+<td style="text-align: left;">PART6</td>
+<td style="text-align: left;">S6</td>
+<td style="text-align: right;">4.0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<ol start="4" type="1">
+<li>Acesse as tabelas REGION, STATE e CUSTOMER. Para todos os clientes, exiba os valores CNO e CNAME, juntamente com os valores STCODE e STNAME do estado ao qual pertencem, bem como os valores RNO e RNAME da região correspondente. Apresente as colunas na seguinte ordem, da esquerda para a direita: RNO, RNAME, STCODE, STNAME, CNO e CNAME. Ordene o resultado por CNO dentro de cada STCODE, e por STCODE dentro de cada RNO (ou seja, primeiro por região, depois por estado e, por último, por cliente).</li>
+</ol>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>4 records</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;">cid</th>
+<th style="text-align: left;">name</th>
+<th style="text-align: left;">type</th>
+<th style="text-align: right;">notnull</th>
+<th style="text-align: left;">dflt_value</th>
+<th style="text-align: right;">pk</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">0</td>
+<td style="text-align: left;">CNO</td>
+<td style="text-align: left;">CHAR(3)</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1</td>
+<td style="text-align: left;">CNAME</td>
+<td style="text-align: left;">CHAR(15)</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">2</td>
+<td style="text-align: left;">CPHONE</td>
+<td style="text-align: left;">CHAR(12)</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">3</td>
+<td style="text-align: left;">STCODE</td>
+<td style="text-align: left;">CHAR(2)</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Displaying records 1 - 10</caption>
+<thead>
+<tr class="header">
+<th style="text-align: right;">RNO</th>
+<th style="text-align: left;">RNAME</th>
+<th style="text-align: left;">STCODE</th>
+<th style="text-align: left;">STNAME</th>
+<th style="text-align: left;">CNO</th>
+<th style="text-align: left;">CNAME</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">NORTHEAST</td>
+<td style="text-align: left;">MA</td>
+<td style="text-align: left;">MASSACHUSETTS</td>
+<td style="text-align: left;">100</td>
+<td style="text-align: left;">PYTHAGORAS</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">NORTHEAST</td>
+<td style="text-align: left;">MA</td>
+<td style="text-align: left;">MASSACHUSETTS</td>
+<td style="text-align: left;">110</td>
+<td style="text-align: left;">EUCLID</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">NORTHEAST</td>
+<td style="text-align: left;">MA</td>
+<td style="text-align: left;">MASSACHUSETTS</td>
+<td style="text-align: left;">200</td>
+<td style="text-align: left;">HYPATIA</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">NORTHEAST</td>
+<td style="text-align: left;">MA</td>
+<td style="text-align: left;">MASSACHUSETTS</td>
+<td style="text-align: left;">220</td>
+<td style="text-align: left;">ZENO</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">NORTHEAST</td>
+<td style="text-align: left;">MA</td>
+<td style="text-align: left;">MASSACHUSETTS</td>
+<td style="text-align: left;">230</td>
+<td style="text-align: left;">BOLYAI</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">NORTHEAST</td>
+<td style="text-align: left;">MA</td>
+<td style="text-align: left;">MASSACHUSETTS</td>
+<td style="text-align: left;">500</td>
+<td style="text-align: left;">HILBERT</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2</td>
+<td style="text-align: left;">NORTHWEST</td>
+<td style="text-align: left;">OR</td>
+<td style="text-align: left;">OREGON</td>
+<td style="text-align: left;">300</td>
+<td style="text-align: left;">NEWTON</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2</td>
+<td style="text-align: left;">NORTHWEST</td>
+<td style="text-align: left;">OR</td>
+<td style="text-align: left;">OREGON</td>
+<td style="text-align: left;">330</td>
+<td style="text-align: left;">LEIBNIZ</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2</td>
+<td style="text-align: left;">NORTHWEST</td>
+<td style="text-align: left;">WA</td>
+<td style="text-align: left;">WASHINGTON</td>
+<td style="text-align: left;">400</td>
+<td style="text-align: left;">DECARTES</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2</td>
+<td style="text-align: left;">NORTHWEST</td>
+<td style="text-align: left;">WA</td>
+<td style="text-align: left;">WASHINGTON</td>
+<td style="text-align: left;">440</td>
+<td style="text-align: left;">PASCAL</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<ol start="5" type="1">
+<li>Acesse as tabelas PART, SUPPLIER e PARTSUPP. Para cada peça que pode ser adquirida de algum fornecedor, exiba os valores PNO e PNAME da peça, os valores SNO e SNAME do fornecedor e o preço (PSPRICE) pago ao fornecedor pela peça. Apresente as colunas na seguinte ordem, da esquerda para a direita: PNO, PNAME, SNO, SNAME e PSPRICE. Ordene o resultado por SNO dentro de cada PNO (ou seja, primeiro por código da peça e, dentro de cada peça, por código do fornecedor).</li>
+</ol>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>5 records</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;">cid</th>
+<th style="text-align: left;">name</th>
+<th style="text-align: left;">type</th>
+<th style="text-align: right;">notnull</th>
+<th style="text-align: left;">dflt_value</th>
+<th style="text-align: right;">pk</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">0</td>
+<td style="text-align: left;">SNO</td>
+<td style="text-align: left;">CHAR(2)</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1</td>
+<td style="text-align: left;">SNAME</td>
+<td style="text-align: left;">CHAR(10)</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">2</td>
+<td style="text-align: left;">SPHONE</td>
+<td style="text-align: left;">CHAR(12)</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">3</td>
+<td style="text-align: left;">SSTATUS</td>
+<td style="text-align: left;">CHAR(1)</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">4</td>
+<td style="text-align: left;">STCODE</td>
+<td style="text-align: left;">CHAR(2)</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Displaying records 1 - 10</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;">PNO</th>
+<th style="text-align: left;">PNAME</th>
+<th style="text-align: left;">SNO</th>
+<th style="text-align: right;">PSPRICE</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">P1</td>
+<td style="text-align: left;">PART1</td>
+<td style="text-align: left;">S2</td>
+<td style="text-align: right;">10.5</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">P1</td>
+<td style="text-align: left;">PART1</td>
+<td style="text-align: left;">S4</td>
+<td style="text-align: right;">11.0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">P3</td>
+<td style="text-align: left;">PART3</td>
+<td style="text-align: left;">S3</td>
+<td style="text-align: right;">12.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">P3</td>
+<td style="text-align: left;">PART3</td>
+<td style="text-align: left;">S4</td>
+<td style="text-align: right;">12.5</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">P4</td>
+<td style="text-align: left;">PART4</td>
+<td style="text-align: left;">S4</td>
+<td style="text-align: right;">12.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">P5</td>
+<td style="text-align: left;">PART5</td>
+<td style="text-align: left;">S1</td>
+<td style="text-align: right;">10.0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">P5</td>
+<td style="text-align: left;">PART5</td>
+<td style="text-align: left;">S2</td>
+<td style="text-align: right;">10.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">P5</td>
+<td style="text-align: left;">PART5</td>
+<td style="text-align: left;">S4</td>
+<td style="text-align: right;">11.0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">P6</td>
+<td style="text-align: left;">PART6</td>
+<td style="text-align: left;">S4</td>
+<td style="text-align: right;">4.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">P6</td>
+<td style="text-align: left;">PART6</td>
+<td style="text-align: left;">S6</td>
+<td style="text-align: right;">4.0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<ol start="6" type="1">
+<li>Para todos os clientes, exiba os valores CNO e CNAME, juntamente com os valores RNO e RNAME da região à qual pertencem. Apresente as colunas na seguinte ordem, da esquerda para a direita: RNO, RNAME, CNO e CNAME. Ordene o resultado por CNO dentro de cada RNO (ou seja, primeiro por região e, dentro de cada região, por código do cliente).</li>
+</ol>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>PRAGMA table_info(CUSTOMER)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>4 records</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;">cid</th>
+<th style="text-align: left;">name</th>
+<th style="text-align: left;">type</th>
+<th style="text-align: right;">notnull</th>
+<th style="text-align: left;">dflt_value</th>
+<th style="text-align: right;">pk</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">0</td>
+<td style="text-align: left;">CNO</td>
+<td style="text-align: left;">CHAR(3)</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1</td>
+<td style="text-align: left;">CNAME</td>
+<td style="text-align: left;">CHAR(15)</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">2</td>
+<td style="text-align: left;">CPHONE</td>
+<td style="text-align: left;">CHAR(12)</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">3</td>
+<td style="text-align: left;">STCODE</td>
+<td style="text-align: left;">CHAR(2)</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Displaying records 1 - 10</caption>
+<thead>
+<tr class="header">
+<th style="text-align: right;">RNO</th>
+<th style="text-align: left;">RNAME</th>
+<th style="text-align: left;">CNO</th>
+<th style="text-align: left;">CNAME</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">NORTHEAST</td>
+<td style="text-align: left;">100</td>
+<td style="text-align: left;">PYTHAGORAS</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">NORTHEAST</td>
+<td style="text-align: left;">110</td>
+<td style="text-align: left;">EUCLID</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">NORTHEAST</td>
+<td style="text-align: left;">200</td>
+<td style="text-align: left;">HYPATIA</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">NORTHEAST</td>
+<td style="text-align: left;">220</td>
+<td style="text-align: left;">ZENO</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">NORTHEAST</td>
+<td style="text-align: left;">230</td>
+<td style="text-align: left;">BOLYAI</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">NORTHEAST</td>
+<td style="text-align: left;">500</td>
+<td style="text-align: left;">HILBERT</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2</td>
+<td style="text-align: left;">NORTHWEST</td>
+<td style="text-align: left;">300</td>
+<td style="text-align: left;">NEWTON</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2</td>
+<td style="text-align: left;">NORTHWEST</td>
+<td style="text-align: left;">330</td>
+<td style="text-align: left;">LEIBNIZ</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2</td>
+<td style="text-align: left;">NORTHWEST</td>
+<td style="text-align: left;">400</td>
+<td style="text-align: left;">DECARTES</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2</td>
+<td style="text-align: left;">NORTHWEST</td>
+<td style="text-align: left;">440</td>
+<td style="text-align: left;">PASCAL</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<ol start="7" type="1">
+<li>Para cada região que tenha pelo menos um cliente, exiba os valores RNO e RNAME correspondentes à região. Ordene o resultado por RNO.</li>
+</ol>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>4 records</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;">RNO</th>
+<th style="text-align: left;">RNAME</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1</td>
+<td style="text-align: left;">NORTHEAST</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2</td>
+<td style="text-align: left;">NORTHWEST</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">3</td>
+<td style="text-align: left;">SOUTHEAST</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">4</td>
+<td style="text-align: left;">SOUTHWEST</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<ol start="8" type="1">
+<li>Acesse as tabelas REGION, STATE, SUPPLIER, PART, PARTSUPP, LINEITEM e PUR_ORDER:</li>
+</ol>
+<ul>
+<li>Considere apenas as peças que foram efetivamente compradas, ou seja, aquelas que aparecem em pelo menos um item de pedido de compra registrado na tabela LINEITEM.</li>
+<li>Para cada peça comprada, exiba o nome da região (RNAME) e do estado (STNAME) onde o fornecedor está localizado, o nome do fornecedor (SNAME), o nome da peça (PNAME), o número do pedido de compra (PONO) e a situação do pedido (POSTATUS).</li>
+<li>Apresente as colunas na seguinte ordem, da esquerda para a direita: RNAME, STNAME, SNAME, PNAME, PONO e POSTATUS.</li>
+<li>Ordene o resultado por LINEITEM.PONO dentro de cada PNAME, por PNAME dentro de cada SNAME, por SNAME dentro de cada STNAME e por STNAME dentro de cada RNAME.</li>
+</ul>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Displaying records 1 - 10</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;">RNAME</th>
+<th style="text-align: left;">STNAME</th>
+<th style="text-align: left;">SNAME</th>
+<th style="text-align: left;">PNAME</th>
+<th style="text-align: left;">PONO</th>
+<th style="text-align: left;">POSTATUS</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">NORTHEAST</td>
+<td style="text-align: left;">CONNECTICUT</td>
+<td style="text-align: left;">SUPPLIER3</td>
+<td style="text-align: left;">PART3</td>
+<td style="text-align: left;">11101</td>
+<td style="text-align: left;">C</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">NORTHEAST</td>
+<td style="text-align: left;">CONNECTICUT</td>
+<td style="text-align: left;">SUPPLIER3</td>
+<td style="text-align: left;">PART3</td>
+<td style="text-align: left;">11102</td>
+<td style="text-align: left;">P</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">NORTHEAST</td>
+<td style="text-align: left;">CONNECTICUT</td>
+<td style="text-align: left;">SUPPLIER3</td>
+<td style="text-align: left;">PART3</td>
+<td style="text-align: left;">11122</td>
+<td style="text-align: left;">P</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">NORTHEAST</td>
+<td style="text-align: left;">MASSACHUSETTS</td>
+<td style="text-align: left;">SUPPLIER1</td>
+<td style="text-align: left;">PART5</td>
+<td style="text-align: left;">11108</td>
+<td style="text-align: left;">C</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">NORTHEAST</td>
+<td style="text-align: left;">MASSACHUSETTS</td>
+<td style="text-align: left;">SUPPLIER1</td>
+<td style="text-align: left;">PART5</td>
+<td style="text-align: left;">11124</td>
+<td style="text-align: left;">P</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">NORTHEAST</td>
+<td style="text-align: left;">MASSACHUSETTS</td>
+<td style="text-align: left;">SUPPLIER1</td>
+<td style="text-align: left;">PART5</td>
+<td style="text-align: left;">11154</td>
+<td style="text-align: left;">C</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">NORTHEAST</td>
+<td style="text-align: left;">MASSACHUSETTS</td>
+<td style="text-align: left;">SUPPLIER1</td>
+<td style="text-align: left;">PART5</td>
+<td style="text-align: left;">11156</td>
+<td style="text-align: left;">C</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">NORTHEAST</td>
+<td style="text-align: left;">MASSACHUSETTS</td>
+<td style="text-align: left;">SUPPLIER1</td>
+<td style="text-align: left;">PART5</td>
+<td style="text-align: left;">11157</td>
+<td style="text-align: left;">P</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">NORTHEAST</td>
+<td style="text-align: left;">MASSACHUSETTS</td>
+<td style="text-align: left;">SUPPLIER2</td>
+<td style="text-align: left;">PART1</td>
+<td style="text-align: left;">11101</td>
+<td style="text-align: left;">C</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">NORTHEAST</td>
+<td style="text-align: left;">MASSACHUSETTS</td>
+<td style="text-align: left;">SUPPLIER2</td>
+<td style="text-align: left;">PART1</td>
+<td style="text-align: left;">11109</td>
+<td style="text-align: left;">P</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<ol start="9" type="1">
+<li>Estamos interessados apenas nas peças de cor rosa que podem ser adquiridas de algum fornecedor localizado na Região Nordeste (Northeast Region).</li>
+</ol>
+<ul>
+<li>Exiba o número e o nome da peça (PNO, PNAME), o número e o nome do fornecedor (SNO, SNAME) e o preço que será pago ao fornecedor pela peça (PSPRICE).</li>
+<li>Exiba também o nome do estado onde o fornecedor está localizado.</li>
+<li>Apresente as colunas na seguinte ordem, da esquerda para a direita: STNAME, SNO, SNAME, PNO, PNAME e PSPRICE.</li>
+<li>Ordene o resultado por PNO dentro de cada SNO e por SNO dentro de cada STNAME.</li>
+</ul>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>2 records</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;">STNAME</th>
+<th style="text-align: left;">SNO</th>
+<th style="text-align: left;">SNAME</th>
+<th style="text-align: left;">PNO</th>
+<th style="text-align: left;">PNAME</th>
+<th style="text-align: right;">PSPRICE</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">CONNECTICUT</td>
+<td style="text-align: left;">S3</td>
+<td style="text-align: left;">SUPPLIER3</td>
+<td style="text-align: left;">P3</td>
+<td style="text-align: left;">PART3</td>
+<td style="text-align: right;">12</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">MASSACHUSETTS</td>
+<td style="text-align: left;">S2</td>
+<td style="text-align: left;">SUPPLIER2</td>
+<td style="text-align: left;">P7</td>
+<td style="text-align: left;">PART7</td>
+<td style="text-align: right;">2</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<ol start="10" type="1">
+<li>Desconsidere as peças de cor rosa cujo preço cobrado pelo fornecedor seja superior a US$ 11,00. Para cada região que tenha pelo menos um fornecedor que forneça alguma peça, exiba o número e o nome da região, seguidos do preço médio pago pelas peças disponíveis nessa região.</li>
+</ol>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>3 records</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;">RNO</th>
+<th style="text-align: left;">RNAME</th>
+<th style="text-align: right;">AVG(PS.PSPRICE)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1</td>
+<td style="text-align: left;">NORTHEAST</td>
+<td style="text-align: right;">8.125000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2</td>
+<td style="text-align: left;">NORTHWEST</td>
+<td style="text-align: right;">3.700000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">3</td>
+<td style="text-align: left;">SOUTHEAST</td>
+<td style="text-align: right;">7.071429</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
