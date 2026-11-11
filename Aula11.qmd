@@ -1,0 +1,211 @@
+---
+title: "Joins III"
+author: "Carlos Trucíos"
+format: 
+  html:
+    code-fold: true
+toc: true
+execute:
+  eval: true
+  echo: true
+---
+
+# Instruções
+
+- Na aula de hoje, utilizaremos o banco de dados `multijoin.sqlite` [que está ni Github](https://github.com/ctruciosm/SQL4Statisticians/blob/main/multijoin.sqlite).
+
+
+# Configurando Rstudio
+
+```{r, echo=TRUE, warning=FALSE}
+#| code-fold: FALSE
+library(DBI)
+library(RSQLite)
+con <- dbConnect(RSQLite::SQLite(), "criando_tabelas.sqlite")
+con2 <- dbConnect(RSQLite::SQLite(), "join_tables.sqlite")
+con3 <- dbConnect(RSQLite::SQLite(), "multijoin.sqlite")
+```
+
+# SQL
+
+::: {.callout-important}
+## OUTER JOIN
+
+- `LEFT OUTER JOIN`
+- `RIGHT OUTER JOIN`
+- `FULL OUTER JOIN`
+:::
+
+
+1. Quais Tabelas existem no Banco de Dados?
+
+```{sql connection=con}
+SELECT name
+FROM sqlite_master
+WHERE type = 'table'
+```
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{sql connection=con}
+SELECT * FROM MAN
+```
+
+:::
+
+::: {.column width="50%"}
+```{sql connection=con}
+SELECT * FROM DOG
+```
+:::
+::::
+
+
+
+
+
+2. Faça um `LEFT JOIN`, `RIGHT JOIN` e `FULL JOIN` das Tabelas `MAN` e `DOG`. 
+
+```{sql connection=con}
+SELECT * 
+FROM MAN LEFT OUTER JOIN DOG
+ON MAN.MNO = DOG.MNO
+```
+
+```{sql connection=con}
+SELECT * 
+FROM MAN RIGHT OUTER JOIN DOG
+ON MAN.MNO = DOG.MNO
+```
+
+
+```{sql connection=con}
+SELECT * 
+FROM MAN FULL OUTER JOIN DOG
+ON MAN.MNO = DOG.MNO
+```
+
+
+3.  Considere as tabelas DEPARTMENT e EMPLOYEE3. Exiba todas as informações de todos os departamentos e de todos os funcionários. Ordene o resultado pelo número do funcionário (ENO), dentro de cada departamento (DNO).
+
+
+```{sql connection=con2}
+select * from DEPARTMENT
+```
+
+
+```{sql connection=con2}
+SELECT *
+FROM DEPARTMENT D FULL OUTER JOIN EMPLOYEE3 E
+ON D.DNO = E.DNO
+ORDER BY D.DNO, E.ENO
+```
+
+4.  Considere as tabelas DEPARTMENT e EMPLOYEE3. Exiba todas as informações de todos os departamentos, juntamente com todas as informações dos funcionários que trabalham nesses departamentos. Ordene o resultado pelo número do funcionário (ENO), dentro de cada departamento (DNO).
+
+```{sql connection=con2}
+SELECT *
+FROM DEPARTMENT D LEFT OUTER JOIN EMPLOYEE3 E
+ON D.DNO = E.DNO
+ORDER BY D.DNO, E.ENO
+```
+
+
+5.  Considere as tabelas DEPARTMENT e EMPLOYEE3. Exiba todas as informações de todos os funcionários, juntamente com todas as informações dos departamentos em que trabalham. Ordene o resultado pelo número do funcionário (ENO), dentro de cada departamento (DNO).
+
+
+```{sql connection=con2}
+SELECT *
+FROM DEPARTMENT D RIGHT OUTER JOIN EMPLOYEE3 E
+ON D.DNO = E.DNO
+ORDER BY D.DNO, E.ENO
+```
+
+```{sql connection=con2}
+SELECT *
+FROM EMPLOYEE3 E LEFT OUTER JOIN DEPARTMENT D
+ON D.DNO = E.DNO
+ORDER BY D.DNO, E.ENO
+```
+
+6.  Considere as tabelas DEPARTMENT e EMPLOYEE. Exiba todas as informações de todos os departamentos, exceto o departamento 40. Se algum departamento, excluindo o departamento 40, tiver um orçamento inferior a US$ 24.000,00, exiba também todas as informações dos funcionários desse departamento. Ordene o resultado pelo número do funcionário (ENO) dentro de cada departamento (DNO).
+
+```{sql connection=con2}
+SELECT *
+FROM DEPARTMENT D LEFT OUTER JOIN EMPLOYEE E
+ON D.DNO = E.DNO AND D.BUDGET < 24_000
+WHERE D.DNO <> 40
+ORDER BY D.DNO, E.ENO
+```
+
+7.  Exiba o número e o nome de todas as regiões, seguidos pelo código e pelo nome de todos os estados pertencentes a cada região. Ordene o resultado pelo código do estado (STCODE) dentro de cada região (RNO)
+
+
+```{sql connection=con3}
+SELECT R.RNO, R.RNAME, S.STCODE, S.STNAME
+FROM REGION R LEFT OUTER JOIN STATE S
+ON R.RNO = S.RNO
+ORDER BY R.RNO, S.STCODE
+```
+
+8.  Exiba o número e o nome de todas as regiões, o código e o nome de todos os estados pertencentes a cada região e o número e o nome de todos os clientes de cada estado. Apresente as colunas na seguinte sequência, da esquerda para a direita: RNO, RNAME, STCODE, STNAME, CNO e CNAME. Ordene o resultado pelo número do cliente (CNO), dentro de cada estado (STCODE), dentro de cada região (RNO).
+
+```{sql connection=con3}
+SELECT R.RNO, R.RNAME, S.STCODE, S.STNAME, C.CNO, C.CNAME
+FROM REGION R 
+LEFT OUTER JOIN STATE S ON R.RNO = S.RNO
+LEFT OUTER JOIN CUSTOMER C ON S.STCODE = C.STCODE
+ORDER BY R.RNO, S.STCODE, C.CNO
+```
+9.  Exiba o número e o nome de todas as regiões, exceto a região SOUTHEAST; o código e o nome de todos os estados, exceto aqueles localizados na região SOUTHEAST; e o número e o nome de todos os clientes, exceto aqueles localizados em estados pertencentes à região SOUTHEAST. Ordene o resultado pelo número do cliente (CNO), dentro de cada estado (STCODE), dentro de cada região (RNO).
+
+```{sql connection=con3}
+SELECT R.RNO, R.RNAME, S.STCODE, S.STNAME, C.CNO, C.CNAME
+FROM REGION R
+LEFT OUTER JOIN STATE S ON R.RNO = S.RNO
+LEFT OUTER JOIN CUSTOMER C ON S.STCODE = C.STCODE
+WHERE R.RNAME <> 'SOUTHEAST'
+ORDER BY R.RNO, S.STCODE, C.CNO
+```
+10. Exiba o número e o nome de todas as regiões, o nome de todos os estados, exceto MASSACHUSETTS, e o nome de todos os clientes, exceto aqueles que estão localizados em MASSACHUSETTS. Ordene o resultado pelo nome do cliente (CNAME), dentro de cada estado (STNAME), dentro de cada região (RNO).
+
+```{sql connection=con3}
+SELECT R.RNO, R.RNAME, S.STCODE, S.STNAME, C.CNAME
+FROM REGION R
+LEFT OUTER JOIN STATE S ON S.RNO = R.RNO AND S.STNAME <> 'MASSACHUSETTS'
+LEFT OUTER JOIN CUSTOMER C ON S.STCODE = C.STCODE
+ORDER BY R.RNO, S.STNAME, C.CNAME
+
+```
+11. Exiba o número e o nome de cada região que contenha pelo menos um estado, o código e o nome de todos os estados (incluindo aqueles que não possuem clientes) e o número e o nome de todos os clientes de cada estado. Apresente as colunas na seguinte sequência, da esquerda para a direita: RNO, RNAME, STCODE, STNAME, CNO e CNAME. Ordene o resultado pelo número do cliente (CNO) dentro de cada estado (STCODE), dentro de cada região (RNO).
+
+```{sql connection=con3}
+SELECT R.RNO, R.RNAME, S.STCODE, S.STNAME, C.CNO, C.CNAME
+FROM REGION R
+INNER JOIN STATE S ON R.RNO = S.RNO
+LEFT OUTER JOIN CUSTOMER C ON S.STCODE = C.STCODE
+ORDER BY R.RNO, S.STCODE, C.CNO
+```
+12. Exiba o número e o nome de todas as regiões que possuam pelo menos um estado, o código e o nome de todos os estados que possuam pelo menos um cliente, o número e o nome de todos os clientes desses estados (incluindo aqueles que não possuem ordens de compra) e a data de cada ordem de compra concluída por esses clientes. Ordene o resultado pela data da ordem de compra (PODATE), dentro de cada cliente (CNO), dentro de cada estado (STCODE), dentro de cada região (RNO).
+
+```{sql connection=con3}
+SELECT R.RNO, R.RNAME, S.STCODE, S.STNAME, C.CNO, C.CNAME, PO.PODATE
+FROM REGION R
+INNER JOIN STATE S ON R.RNO = S.RNO
+INNER JOIN CUSTOMER C ON S.STCODE = C.STCODE
+LEFT OUTER JOIN PUR_ORDER PO ON C.CNO = PO.CNO
+ORDER BY R.RNO, S.STCODE, C.CNO, PO.PODATE
+```
+
+13. Exiba o número e o nome de todas as regiões, o código e o nome de todos os estados que possuam pelo menos um cliente, o número e o nome de todos os clientes que possuam pelo menos uma ordem de compra e o número e o status das ordens de compra desses clientes. Ordene o resultado pelo número da ordem de compra (PONO), dentro de cada cliente (CNO), dentro de cada estado (STCODE), dentro de cada região (RNO).
+
+```{sql connection=con3}
+SELECT R.RNO, R.RNAME, S.STCODE, S.STNAME, C.CNO, C.CNAME, PO.PONO, PO.POSTATUS
+FROM REGION R
+LEFT OUTER JOIN STATE S ON R.RNO = S.RNO
+INNER JOIN CUSTOMER C ON S.STCODE = C.STCODE
+INNER JOIN PUR_ORDER PO ON PO.CNO = C.CNO
+ORDER BY R.RNO, S.STCODE, C.CNO, PO.PONO
+```
+
